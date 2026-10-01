@@ -1,9 +1,11 @@
 # つみなまこ / Tsumi Namako
 
-Godot 4.7.2 Android game and HTML edition. Japanese OS locale uses Japanese; other locales use English.
+Godot 4.7.2 / HTML edition. Japanese OS locale uses Japanese; other locales use English.
 
-Current Android build: 0.4.8, ARM64, Android 7.0+, debug signed.
+## Android APK
 
-Open project.godot with Godot. Build HTML using `python tools/build_browser.py`.
+Download the debug-signed ARM64 Android 7.0+ APK from [Releases](https://github.com/ukr8b3g-cmyk/tsuminamako-android-APK/releases).
 
-See ANDROID_INSTALL_JA.md and LCD_ANDROID_REPORT_JA.md for validation and device-test limitations.
+Open project.godot with Godot. Build the standalone HTML with `python tools/build_browser.py`.
+
+See ANDROID_INSTALL_JA.md and LCD_ANDROID_REPORT_JA.md. Android physical-device checks are not yet completed.

@@ -1,0 +1,254 @@
+* {box-sizing:border-box} [hidden]{display:none!important}
+:root{font-family:"Yu Gothic UI",Meiryo,"Noto Sans CJK JP",system-ui,sans-serif;color:#254b50;background:#d9e8e1}
+body{margin:0;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;height:100dvh;background:radial-gradient(ellipse at 50% 35%,#edf6eb,#ccdeda);user-select:none;-webkit-user-select:none}
+#wrap{position:relative;overflow:hidden;box-shadow:0 15px 70px #284d4a25}
+#stage{position:absolute;left:0;top:0;width:540px;height:860px;transform-origin:top left;overflow:hidden;background:#eaf5f0;touch-action:none}
+canvas{position:absolute;inset:0;width:540px;height:860px;touch-action:none}
+h1{position:absolute;left:20px;top:7px;margin:0;font-size:34px;font-weight:800;letter-spacing:.5px;line-height:43px}
+.subtitle{position:absolute;left:28px;top:65px;font-size:13px;color:#668783}
+button{position:absolute;appearance:none;border:1px solid #bad7cf;background:#f9fcf8;color:#254b50;border-radius:15px;font:700 21px/1.3 inherit;font-family:inherit;font-size:21px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 #abc8be;transition:filter .12s,transform .12s,box-shadow .12s;touch-action:manipulation;white-space:nowrap}
+button:hover{filter:brightness(1.04);box-shadow:0 4px 0 #9bbdb1}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #9bbdb1}
+button:focus-visible{outline:3px solid #dc9d54;outline-offset:3px}
+button:disabled{cursor:default;filter:none;transform:none;background:#d9e4df;color:#92a5a0;box-shadow:none;border-color:#cbded4}
+button.primary{background:#348d7d;color:#fff;border-color:#348d7d;box-shadow:0 4px 0 #266c61}
+button.primary:disabled{background:#b7d5c8;border-color:#b7d5c8;color:#f3f7f2;box-shadow:none}
+button.small{height:30px;font-size:12px;border-radius:10px;box-shadow:0 2px 0 #ccdfd6}
+#version{position:absolute;left:239px;top:25px;font-size:12px;color:#668783}
+#menu{left:278px;top:8px;width:46px;height:42px;font-size:23px}
+#difficulty{position:absolute;left:184px;top:8px;width:88px;height:42px;font-size:16px;border:2px solid #c79864;background:#ffe5ba;color:#755039;box-shadow:0 3px 0 #bd8753}
+html[data-theme="dark"] #difficulty{background:#5a4639;color:#ffe7ba;border-color:#d3a16e}
+#lore-button{left:330px;top:8px;width:92px;height:42px;font-size:15px;z-index:1;background:#ffedbb;color:#744b2b;border:2px solid #c99b53}
+#cards-button{left:428px;top:8px;width:92px;height:42px;font-size:14px;z-index:1}
+#theme,#music,#sfx,#track,#speed{top:55px;height:38px;font-size:12px;border-radius:12px}
+#theme{left:20px;width:90px}#music{left:114px;width:76px}#sfx{left:194px;width:68px}
+#track{left:266px;width:142px}#speed{left:412px;width:108px}
+#tip{position:absolute;left:32px;top:98px;width:476px;height:44px;display:flex;align-items:center;justify-content:center;white-space:pre-line;text-align:center;font-size:15px;line-height:1.35}
+#mode{position:absolute;left:86px;top:147px;color:#348d7d;font-size:12px;letter-spacing:1px}
+#count{position:absolute;left:300px;top:147px;width:154px;text-align:right;color:#668783;font-size:12px}
+#fill-label{position:absolute;left:22px;top:190px;font-size:12px;color:#668783;letter-spacing:1px}
+#fill{position:absolute;left:19px;top:213px;font-size:25px;font-weight:800;color:#348d7d}
+#target{position:absolute;left:17px;top:257px;font-size:11px;color:#668783}
+#next-label{position:absolute;left:466px;top:190px;font-size:11px;color:#668783;letter-spacing:.5px}
+#status{position:absolute;left:20px;top:743px;width:500px;height:22px;text-align:center;font-size:15px;color:#348d7d;line-height:22px}
+#start{left:82px;top:770px;width:376px;height:60px;font-size:25px;letter-spacing:3px}
+#left{left:20px;top:770px;width:86px;height:60px}#right{left:112px;top:770px;width:86px;height:60px}
+#rotate{left:204px;top:770px;width:112px;height:60px}#drop{left:322px;top:770px;width:198px;height:60px}
+#footer{position:absolute;left:18px;top:837px;width:504px;height:20px;text-align:center;font-size:11px;color:#668783;white-space:pre}
+#shade{position:absolute;inset:0;background:#193b3e57;touch-action:none}
+#modal{position:absolute;left:58px;top:302px;width:424px;height:277px;border-radius:24px;background:#fffdf5;box-shadow:0 15px 45px #193b3e2b;text-align:center}
+#modal-title{position:absolute;left:22px;top:22px;width:380px;height:45px;margin:0;font-size:29px;line-height:45px}
+#modal-note{position:absolute;left:22px;top:77px;width:380px;height:44px;font-size:15px;line-height:1.5;white-space:pre-line;color:#668783}
+#continue{left:52px;top:135px;width:320px;height:54px}#to-demo{left:52px;top:203px;width:320px;height:45px;font-size:17px}
+@media (prefers-reduced-motion: reduce){button{transition:none}}
+
+#celebrate-banner{position:absolute;left:48px;top:332px;width:444px;min-height:146px;padding:19px 22px 17px;border-radius:27px;background:#fffaf0e8;border:2px solid #f1c96e;box-shadow:0 12px 34px #385d5132;text-align:center;pointer-events:none;animation:celebrate-pop .48s cubic-bezier(.2,1.5,.4,1)}
+#celebrate-title{font-size:27px;line-height:1.25;font-weight:800;color:#b66d43;letter-spacing:.5px}
+#celebrate-message{margin-top:10px;font-size:17px;line-height:1.55;color:#476b68;white-space:pre-line}
+@keyframes celebrate-pop{0%{transform:scale(.72) rotate(-2deg);opacity:0}65%{transform:scale(1.05) rotate(1deg);opacity:1}100%{transform:scale(1);opacity:1}}
+
+#reward{position:absolute;left:35px;top:50px;width:470px;height:750px;border:2px solid var(--accent,#a9b6b2);border-radius:26px;background:#f9fcf8;box-shadow:0 18px 50px #112c38a0;text-align:center;overflow:hidden;perspective:900px}
+#reward.rarity-N{--accent:#a9b6b2;--aura:#c2d8d1}
+#reward.rarity-R{--accent:#81a8c4;--aura:#9bbbd8}
+#reward.rarity-SR{--accent:#9fdacb;--aura:#81e2d1}
+#reward.rarity-SSR{--accent:#f5c65c;--aura:#ffe07d}
+#reward.rarity-SECRET{--accent:#c5d9f6;--aura:#d7e4ff}
+#reward-title{position:absolute;left:20px;top:18px;width:430px;margin:0;font-size:29px;color:#254b50}
+#reward-aura{position:absolute;left:34px;top:102px;width:402px;height:490px;border-radius:50%;background:radial-gradient(ellipse,var(--aura) 0%,#ffffff00 67%);opacity:.72;animation:reward-pulse 1.4s ease-in-out infinite alternate}
+.rarity-N #reward-aura{opacity:.25;animation:none}.rarity-R #reward-aura{opacity:.45}
+.rarity-SSR{background:radial-gradient(ellipse at 50% 44%,#fff6d5,#f9fcf8 72%)!important}
+.rarity-SECRET{background:radial-gradient(ellipse at 50% 44%,#e4f1ff,#f9fcf8 72%)!important}
+#reward-sparks{position:absolute;inset:0;color:var(--accent);pointer-events:none}
+.rarity-N #reward-sparks,.rarity-R #reward-sparks{display:none}
+#reward-sparks i{position:absolute;font-style:normal;font-size:28px;text-shadow:0 0 10px var(--accent);animation:reward-twinkle 1.2s ease-in-out infinite alternate}
+#reward-sparks i:nth-child(1){left:57px;top:178px;animation-delay:.0s}#reward-sparks i:nth-child(2){left:399px;top:174px;animation-delay:.4s}
+#reward-sparks i:nth-child(3){left:46px;top:300px;animation-delay:.8s}#reward-sparks i:nth-child(4){left:405px;top:300px;animation-delay:.2s}
+#reward-sparks i:nth-child(5){left:60px;top:450px;animation-delay:.6s}#reward-sparks i:nth-child(6){left:398px;top:440px;animation-delay:1s}
+#reward-sparks i:nth-child(7){left:103px;top:100px;animation-delay:.3s}#reward-sparks i:nth-child(8){left:352px;top:100px;animation-delay:.9s}
+#reward-flip{position:absolute;left:95px;top:116px;width:280px;height:420px;transform-origin:center;filter:drop-shadow(0 12px 18px #20383a66)}
+#reward-flip.play{animation:reward-spin var(--duration,1.4s) cubic-bezier(.18,.76,.25,1) both}
+#reward-flip.instant{transform:none}
+.reward-face{position:absolute;inset:0;width:100%;height:100%;border-radius:12px}
+#reward-back{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;border:7px double var(--accent);background:radial-gradient(ellipse at 50% 35%,#f9fff8,#c8e7df 75%);color:#599284;font-size:54px;font-weight:800}
+#reward-back span{font-size:22px;letter-spacing:4px}
+#reward-front{object-fit:contain;background:#fffdf6}
+#reward-note{position:absolute;left:25px;top:565px;width:420px;min-height:75px;font-size:17px;font-weight:700;line-height:1.6;white-space:pre-line;color:#254b50}
+#reward-next{left:75px;top:663px;width:320px;height:55px;font-size:20px}
+@keyframes reward-spin{0%{transform:translateY(80px) scale(.22) rotate(-720deg)}52%{transform:translateY(-16px) scale(.88) rotate(-64deg)}62%{transform:translateY(-8px) scale(.92,.04) rotate(0deg)}78%{transform:translateY(0) scale(1.06) rotate(0deg)}100%{transform:translateY(0) scale(1) rotate(0deg)}}
+@keyframes reward-pulse{from{transform:scale(.84);opacity:.4}to{transform:scale(1.16);opacity:.88}}
+@keyframes reward-twinkle{from{opacity:.18;transform:scale(.5) rotate(-18deg)}to{opacity:1;transform:scale(1.35) rotate(18deg)}}
+
+#collection{position:absolute;left:20px;top:35px;width:500px;height:790px;border-radius:24px;background:#fffdf6;box-shadow:0 18px 50px #112c38a0;padding:20px;text-align:center}
+#collection-title{margin:0 100px 2px;font-size:28px;line-height:40px}
+#collection-close{right:20px;top:22px;width:78px;height:31px;font-size:14px}
+#collection-progress{height:50px;margin-top:5px;font-size:14px;color:#476b68;line-height:1.5}
+#collection-grid{height:650px;overflow-y:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;gap:9px;padding:4px;overscroll-behavior:contain}
+.collection-tile{min-height:199px;border:1px solid #c9d8d2;border-radius:12px;background:#eef4ef;padding:8px 3px 6px;display:flex;flex-direction:column;align-items:center}
+.collection-tile img,.collection-back{width:100px;height:150px;object-fit:contain;border-radius:6px;background:#d6e7e3}
+.collection-back{display:grid;place-items:center;border:3px double #8eb4a8;color:#749e91;font-size:48px}
+.collection-label{margin-top:5px;font-size:11px;line-height:1.3;color:#254b50;white-space:nowrap}
+.collection-tile.locked .collection-label{color:#819895}
+@media (prefers-reduced-motion:reduce){#reward-flip.play{animation:none;transform:none}#reward-aura,#reward-sparks i{animation:none}}
+
+html[data-theme="dark"]{color-scheme:dark;color:#d9eee7;background:#0b171f}
+html[data-theme="dark"] body{background:radial-gradient(ellipse at 50% 35%,#1b3440,#08131b)}
+html[data-theme="dark"] #stage{background:#101f2b}
+html[data-theme="dark"] button{background:#243e49;color:#e0f3eb;border-color:#41636c;box-shadow:0 3px 0 #09191e}
+html[data-theme="dark"] button.primary{background:#287d70;color:#fff}
+html[data-theme="dark"] :is(#tip,h1,#reward-title,#reward-note,#collection-title,#modal-title){color:#e0f3eb}
+html[data-theme="dark"] :is(.subtitle,#version,#fill-label,#next-label,#target,#footer,#count,#collection-progress,#modal-note,.collection-label){color:#a9c9c4}
+html[data-theme="dark"] :is(#mode,#fill,#status){color:#83d7be!important}
+html[data-theme="dark"] :is(#modal,#collection,#reward,#celebrate-banner){background:#172d39!important;color:#e0f3eb}
+html[data-theme="dark"] .collection-tile{background:#213944;border-color:#40606b}
+html[data-theme="dark"] :is(.collection-back,#reward-back){background:#25434b;color:#acd8ca}
+html[data-theme="dark"] :is(#celebrate-title,#celebrate-message){color:#ead5a2}
+html[data-theme="dark"] #reward-aura{opacity:.25}
+
+#resume-save{left:82px;top:770px;width:180px;height:60px;font-size:21px}
+#trivia{position:absolute;left:25px;top:25px;width:490px;height:810px;overflow:hidden;border:4px solid #65c9d9;border-radius:25px;background:#2a5262;box-shadow:0 20px 55px #071c2dc0;color:#fff;z-index:3}
+.trivia-heading{position:absolute;left:25px;top:15px;width:440px;text-align:center;font-size:31px;font-weight:900;color:#ffdc79;text-shadow:0 3px 0 #583d2b}
+.trivia-lab{position:absolute;left:18px;top:72px;width:454px;height:315px;overflow:hidden;border:3px solid #ba9c68;border-radius:18px;background:linear-gradient(130deg,#31515e,#8da59d 45%,#324d56);background-image:radial-gradient(circle at 86% 20%,#b6cbd14a,#0000 34%),repeating-linear-gradient(90deg,#ffffff0c 0 2px,#0000 2px 60px),linear-gradient(130deg,#31515e,#8da59d 45%,#324d56)}
+.trivia-professor-open{left:4px;bottom:0;width:240px;height:305px;padding:0;overflow:visible;border:0;background:transparent!important;box-shadow:none!important;z-index:1}
+#trivia-professor{position:absolute;left:0;bottom:0;width:314px;height:311px;object-fit:contain;object-position:bottom left;filter:drop-shadow(3px 5px 7px #102a38a0);pointer-events:none}
+.trivia-companions{position:absolute;right:10px;bottom:7px;display:flex;gap:8px;z-index:2}
+.trivia-companion{position:relative;width:83px;height:118px;padding:4px 3px 2px;border:2px solid #e7cf8c;border-radius:9px;background:#fff4db!important;color:#43535b!important;box-shadow:0 3px 0 #1739499c!important;font-size:11px;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.trivia-companion img{width:69px;height:94px;object-fit:contain;border-radius:4px}
+.trivia-companion span{display:block}
+#trivia-card-viewer{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:65px 18px 17px;background:#102b38f5}
+#trivia-card-large{display:block;width:100%;max-width:440px;max-height:675px;min-height:0;flex:1;object-fit:contain;filter:drop-shadow(0 10px 18px #001b2ccc);cursor:zoom-out}
+#trivia-card-caption{font-size:17px;font-weight:800;color:#fff5d6;text-align:center}
+#trivia-card-close{right:17px;top:16px;width:116px;height:44px;z-index:1;font-size:17px;background:#fff4db!important;color:#244653!important;border:2px solid #d7af73!important}
+.trivia-speech{position:absolute;left:254px;top:38px;width:187px;min-height:131px;display:grid;place-items:center;text-align:center;padding:10px;border:3px solid #4b7380;border-radius:22px;background:#f4f0de;color:#173948;font-size:17px;font-weight:800;line-height:1.45;box-shadow:0 5px 0 #203a4780}
+.trivia-name{position:absolute;left:34px;top:396px;width:422px;text-align:center;font-size:18px;font-weight:800;color:#fff2d3}
+.trivia-paper{position:absolute;left:18px;top:426px;width:454px;height:302px;margin:0;padding:12px 20px;border:3px solid #b58e5c;border-radius:13px;background:radial-gradient(circle at 80% 30%,#fff8e3,#fff1d1 75%);box-shadow:inset 0 0 20px #aa7f3930;color:#274550;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+#trivia-number{font-size:15px;font-weight:800;color:#74563a;border-bottom:1px solid #a68861;padding-bottom:5px}
+#trivia-title{margin:9px 0 6px;font-size:22px;line-height:1.3;color:#173948}
+#trivia-body{margin:0;font-size:16.5px;line-height:1.45;white-space:pre-wrap}
+.trivia-footnote{position:absolute;left:30px;top:732px;width:430px;text-align:center;font-size:12px;color:#e4d5b4}
+#trivia-next{left:45px;top:750px;width:400px;height:52px;font-size:23px;background:#e9785d;border:2px solid #b84747;box-shadow:0 4px 0 #8a3544}
+#trivia-more{left:45px;top:750px;width:192px;height:52px;font-size:20px;background:#ffedbb;color:#744b2b;border:2px solid #b58e5c;box-shadow:0 4px 0 #8d714f}
+#trivia.browse #trivia-next{left:250px;width:195px;font-size:20px}
+html[data-theme="dark"] #trivia{background:#193547;color:#fff}
+html[data-theme="dark"] .trivia-lab{background:linear-gradient(130deg,#0d2634,#395865 60%,#122d39)}
+html[data-theme="dark"] .trivia-paper{background:#eee2c8;color:#274550}
+@media (prefers-reduced-motion:no-preference){#trivia:not([hidden]){animation:trivia-enter .45s cubic-bezier(.2,1.15,.3,1) both}@keyframes trivia-enter{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}}
+#reward.rarity-COMPLETE{--accent:#efca72;--aura:#f6d6ae}
+
+#reward.rarity-COMPLETE #reward-title{font-size:25px}
+
+.collection-tile.owned img{cursor:zoom-in;touch-action:manipulation}
+.collection-tile.owned img:focus-visible{outline:3px solid #dc9d54;outline-offset:3px}
+#card-zoom{position:absolute;inset:0;width:100%;height:100%;z-index:5;border:0;border-radius:24px;background:#102c35f5!important;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:zoom-out;transform:none;padding:20px;color:#e8f6ef}
+#card-zoom img{width:440px;height:660px;max-width:100%;object-fit:contain;border-radius:12px;filter:drop-shadow(0 8px 12px #0006)}
+#card-zoom span{font-size:16px;color:#e8f6ef;white-space:normal}
+
+/* Figma 390×844 game skin: scalable vectors and generous primary touch targets. */
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:linear-gradient(155deg,#f1faf6,#d9ebe6)}
+#wrap{box-shadow:0 16px 55px #25534a25}
+h1{left:20px;top:13px;font-size:31px;line-height:43px;letter-spacing:0}
+#version{left:22px;top:43px;width:180px;font-size:11px;font-weight:700;letter-spacing:1px;color:#668985}
+button{border-color:#b2d9d3;border-radius:17px;background:#f4fbf8;color:#204b53;box-shadow:0 3px 9px #25655a17;transition:filter .12s,transform .12s,box-shadow .12s}
+button:hover{box-shadow:0 5px 11px #25655a24}
+button:active{box-shadow:0 1px 4px #25655a26}
+button.primary{background:#208f7d;border-color:#208f7d;box-shadow:0 4px 10px #13695b38}
+#menu{font-size:28px}
+#cards-button{font-size:14px}
+#theme,#music,#sfx,#track,#speed{border:0;border-radius:15px;background:#e1f2ec;box-shadow:none;font-size:16px}
+#track{font-size:12px}#speed{font-size:13px}#music,#sfx{font-size:15px}
+#tip{font-size:16px;line-height:1.3}
+#fill-label{display:none}
+#fill{font-size:26px;color:#168c7c}
+#target{font-size:13px}
+#mode{font-size:12px;color:#168c7c;letter-spacing:.5px}
+#count{font-size:14px}
+#next-label{font-size:12px;font-weight:700}
+#status{font-size:15px;color:#168c7c;line-height:24px;font-weight:700}
+#left,#right{font-size:29px}#rotate,#drop{font-size:22px}
+#start{font-size:28px}
+#footer{font-size:10px;line-height:12px}
+html[data-theme="dark"] body{background:linear-gradient(155deg,#112b39,#07121d)}
+html[data-theme="dark"] #stage{background:#0a1822}
+html[data-theme="dark"] button{background:#21434e;color:#e8f9f3;border-color:#3a6570;box-shadow:0 3px 9px #0004}
+html[data-theme="dark"] button.primary{background:#3eb59f;color:#fff;border-color:#3eb59f;box-shadow:0 4px 12px #0006}
+html[data-theme="dark"] :is(#theme,#music,#sfx,#track,#speed){background:#1b3a45;box-shadow:none}
+html[data-theme="dark"] :is(#fill,#mode,#status){color:#74e5c8!important}
+html[data-theme="dark"] :is(#version,#target,#count,#next-label){color:#a7c9c8}
+
+/* Bright aquarium glass and a warm primary action give the play screen a game-like rhythm. */
+body{background:linear-gradient(155deg,#f2fbfd,#d4ebf3)}
+#stage{background:#eaf7fb}
+button{border-color:#8bc9d9}
+button.primary{background:#e9785d;border-color:#e9785d;box-shadow:0 4px 10px #a9473a4d}
+#theme,#music,#sfx,#track,#speed{background:#e0f3fa}
+html[data-theme="dark"] body{background:linear-gradient(155deg,#102e42,#07121d)}
+html[data-theme="dark"] #stage{background:#071c29}
+html[data-theme="dark"] button.primary{background:#e9785d;border-color:#e9785d;box-shadow:0 4px 12px #08101e66}
+html[data-theme="dark"] :is(#theme,#music,#sfx,#track,#speed){background:#1b4051}
+#theme{background:#e5d8fa;color:#523770;border:1px solid #b89bda}
+#speed{background:#ffebb8;color:#765116;border:1px solid #e4bd59}
+#cards-button{background:#d5f4f3;color:#0e6f80;border-color:#54afbe}
+html[data-theme="dark"] #theme{background:#514274;color:#f5eaff;border:1px solid #b7a1ef}
+html[data-theme="dark"] #speed{background:#6c5235;color:#fff0bf;border:1px solid #efc66a}
+html[data-theme="dark"] #cards-button{background:#124c63;color:#e3fcff;border-color:#66d3e8}
+html[data-theme="dark"] #lore-button{background:#6a4a33;color:#fff0c7;border-color:#e9bb72}
+html[data-theme="dark"] #trivia-more{background:#6a4a33;color:#fff0c7;border-color:#e9bb72}
+html[data-theme="dark"] #difficulty{background:#5a4639;color:#ffe7ba;border:2px solid #d3a16e}
+
+/* English words need room on portrait phone layouts. */
+html[lang="en"] h1{font-size:22px;letter-spacing:0}
+html[lang="en"] #tip{font-size:13px}
+html[lang="en"] #track{font-size:11px}
+html[lang="en"] #theme{font-size:14px}
+html[lang="en"] #speed{font-size:13px}
+html[lang="en"] :is(#start,#resume-save){font-size:23px;letter-spacing:0}
+html[lang="en"] #status{font-size:13px}
+html[lang="en"] #footer{font-size:10px}
+html[lang="en"] #mode{font-size:11px;letter-spacing:0;white-space:nowrap}
+html[lang="en"] .trivia-name{font-size:16px}
+html[lang="en"] .trivia-speech{font-size:17px}
+html[lang="en"] #trivia-next{font-size:21px}
+html[lang="en"] #trivia-body{white-space:pre-line}
+html[lang="en"] #reward-note{font-size:16px}
+html[lang="en"] .collection-label{overflow-wrap:anywhere;white-space:normal}
+
+/* Phone readability: preserve button heights, enlarge labels. */
+h1,html[lang="en"] h1{font-size:24px;line-height:30px;z-index:1;pointer-events:none;color:#216580;text-shadow:0 1px #fff8}
+html[data-theme="dark"] h1{color:#b6edff;text-shadow:0 1px #071c29}
+#menu{font-size:18px}#difficulty,#lore-button,#cards-button{font-size:18px}
+#track,html[lang="en"] #track{font-size:16px}
+#speed,html[lang="en"] #speed{font-size:15px}
+#theme,html[lang="en"] #theme,#music,#sfx{font-size:18px}
+#target,#mode,html[lang="en"] #mode,#next-label{font-size:15px;letter-spacing:0}
+#count{font-size:16px}#tip,html[lang="en"] #tip{font-size:15px}
+#status,html[lang="en"] #status{font-size:15px}
+#footer,html[lang="en"] #footer{font-size:12px}
+#trivia-number{font-size:17px}#trivia-title{font-size:24px}
+#trivia-body{font-size:19px;line-height:1.55}
+
+#reward-note{overflow:auto;margin:0;min-height:0;overscroll-behavior:contain}
+#trivia-card-large{max-height:none}
+
+#modal{height:340px}#restart-pause{left:52px;top:199px;width:320px;height:54px;font-size:23px}#to-demo{top:265px}
+
+/* Original reflective LCD handheld theme. Color artwork in dialogs is retained. */
+h1,html[lang="en"] h1{font-size:26px;line-height:34px;opacity:.75}
+h1.demo-title,html[lang="en"] h1.demo-title{font-size:34px;line-height:42px}
+#mode,html[lang="en"] #mode{font-size:25px;line-height:36px;text-align:center;opacity:.65;pointer-events:none;font-weight:800;letter-spacing:1px}
+#footer,html[lang="en"] #footer{font-size:14px}
+#lcd-hardware{display:none}
+html[data-theme="lcd"] body{background:#233d40}
+html[data-theme="lcd"] #stage{background:#c5c9c8 url("assets/lcd_metal.png") center/cover;box-shadow:inset 0 0 0 8px #2d777e,inset 0 0 0 12px #204a50;border-radius:28px}
+html[data-theme="lcd"] #lcd-hardware{display:block;position:absolute;inset:0;pointer-events:none}
+#lcd-hardware i{position:absolute;width:11px;height:11px;border:1px solid #606b6b;border-radius:50%;background:linear-gradient(135deg,#edf0ec,#859391);box-shadow:0 1px 2px #0006}
+#lcd-hardware i:after{content:"";position:absolute;top:4px;left:1px;width:7px;height:1px;background:#61716f;transform:rotate(-35deg)}
+#lcd-hardware i:nth-child(1){left:12px;top:12px}#lcd-hardware i:nth-child(2){right:12px;top:12px}#lcd-hardware i:nth-child(3){left:12px;bottom:12px}#lcd-hardware i:nth-child(4){right:12px;bottom:12px}
+html[data-theme="lcd"] #stage>button,html[data-theme="lcd"] #controls>button{border:2px solid #184f56;background:linear-gradient(#467f84,#205b64);color:#fff;box-shadow:0 4px 0 #153d43,0 5px 7px #0004}
+html[data-theme="lcd"] #controls>button,html[data-theme="lcd"] #start,html[data-theme="lcd"] #resume-save{background:linear-gradient(#ef6152,#c73c32);border-color:#8d2c28;box-shadow:0 5px 0 #8d2c28,0 7px 7px #0004;border-radius:28px}
+html[data-theme="lcd"] h1,html[data-theme="lcd"] #mode{color:#263129;text-shadow:none}
+html[data-theme="lcd"] #tip,html[data-theme="lcd"] #status,html[data-theme="lcd"] #footer,html[data-theme="lcd"] #count,html[data-theme="lcd"] #fill,html[data-theme="lcd"] #target,html[data-theme="lcd"] #next-label{color:#263b39!important}
+html[data-theme="lcd"] #tip{background:#bcc6bd;border:2px solid #758a82;border-radius:12px}
+html[data-theme="lcd"] #status{background:#bdc6bc;border-radius:10px}
+html[data-theme="lcd"] #stage{background-size:440px 440px;background-blend-mode:multiply;background-color:#89938f}
+html[data-theme="lcd"] #start,html[data-theme="lcd"] #resume-save,html[data-theme="lcd"] #controls>button{background:linear-gradient(#ef6152,#c73c32)!important;border-color:#8d2c28!important;box-shadow:0 5px 0 #8d2c28,0 7px 7px #0004!important}#footer{line-height:20px!important;font-size:13px!important}html[lang="en"] #footer{font-size:12px!important}
+
+#lcd-hardware i{width:17px;height:17px}#lcd-hardware i:after{top:7px;left:3px;width:9px;height:2px}#lcd-hardware i:nth-child(1),#lcd-hardware i:nth-child(3){left:7px}#lcd-hardware i:nth-child(2),#lcd-hardware i:nth-child(4){right:7px}

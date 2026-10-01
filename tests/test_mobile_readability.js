@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert'),{chromium}=require('playwright');
+const root='D:/Godot_v4.7.2-stable_win64.exe/NamakoTsumi_v0.4';
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});let checks=0;try{
+for(const lang of ['ja','en'])for(const size of [[360,640],[390,844],[412,915],[1440,3200]])for(const dark of [false,true]){
+ const page=await browser.newPage({viewport:{width:size[0],height:size[1]},deviceScaleFactor:2});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setContent(fs.readFileSync(root+'/START.html','utf8').replace('<head>',`<head><script>window.NAMAKO_OS_LOCALE='${lang}';window.NAMAKO_TEST_MODE=true;</script>`));await page.waitForFunction(()=>window.__namako);
+ await page.evaluate(async dark=>{const g=__namako;g.dark=dark;g.applyTheme();g.beginPlay();for(let speed=0;speed<5;speed++){g.speedIndex=speed;for(let track=0;track<4;track++){g.audio.trackIndex=track;g.audio.musicEnabled=false;g.audio.sfxEnabled=false;g.sync();const buttons=['theme','track','speed','music','sfx','menu','lore-button','difficulty','cards-button'].map(id=>document.getElementById(id));for(const b of buttons){const st=getComputedStyle(b),c=document.createElement('canvas').getContext('2d');c.font=st.font;const w=c.measureText(b.textContent).width;if(w+4>b.clientWidth)throw Error('Text width '+b.id+' '+b.textContent+' '+w+'/'+b.clientWidth);}for(let i=1;i<5;i++){const a=buttons[i-1].getBoundingClientRect(),b=buttons[i].getBoundingClientRect();if(a.right>b.left+.5)throw Error('Settings overlap');}}}g.speedIndex=3;if(g.speed!==3)throw Error('3x');g.pause();if(g.mode!=='paused')throw Error('Pause');g.resume();const origin=g.origin.slice();g.openLore();if(g.mode!=='trivia')throw Error('Reader');g.moreLore();g.finishTrivia();if(g.mode!=='play'||String(g.origin)!==String(origin))throw Error('Restore');g.openLore();},dark);
+ if(size[0]===390)await page.screenshot({path:root+`/tests/readable_${lang}_${dark?'dark':'light'}_notes.png`});
+ await page.evaluate(()=>{const paper=document.getElementById('trivia-paper');paper.scrollTop=10000;if(paper.scrollHeight>paper.clientHeight&&paper.scrollTop===0)throw Error('Cannot scroll');__namako.finishTrivia();});
+ if(size[0]===390)await page.screenshot({path:root+`/tests/readable_${lang}_${dark?'dark':'light'}_play.png`});
+ assert.deepEqual(errors,[]);checks++;await page.close();
+}console.log('PASS '+checks+' phone/language/theme cases: labels, 3x, pause, reader, resume, scroll');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

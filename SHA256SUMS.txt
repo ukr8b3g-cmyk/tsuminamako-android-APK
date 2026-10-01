@@ -1,0 +1,3 @@
+3011f5318058f8c46edbca80f003f518d3b06ee10de83ae1ed3c6706dc2484ab  builds/tsuminamako-0.4.2-trivia100-debug.apk
+10dcab96d4ac4b7feb1fcbc40876c98ea94546d0e4a51db7e4cc9638434e4326  START.html
+3d36b51e11785c1e251e6e10fd3938f9c1f2f81f0c4e1d260b2a32e255802b7e  data/namako_episodes_100.json
