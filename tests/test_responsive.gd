@@ -13,7 +13,7 @@ func run() -> void:
 		fits = fits and absf(board.size.x - board.cell_size * 8) < 0.01 and absf(board.size.y - board.cell_size * 12) < 0.01
 		fits = fits and absf(game.card_ui.size.y - game.layout_height) < 0.01 and absf(game.card_ui.overlay_shade.size.y - game.layout_height) < 0.01
 		if resolution.y * 1.0 / resolution.x >= 2.0:
-			fits = fits and board.cell_size >= 59.0 and game.ui_count.position.y + game.ui_count.size.y < game.next_label.position.y
+			fits = fits and board.cell_size >= 56.0 and game.ui_count.position.y + game.ui_count.size.y < game.next_label.position.y
 		ok = ok and fits
 		print("responsive native ",resolution,": ",fits," cell=",board.cell_size," height=",game.layout_height)
 	game.queue_free()

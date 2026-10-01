@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict'),path=require('node:path'),{pathToFileURL}=require('node:url'),{chromium}=require('playwright');
 (async()=>{
- const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+ const browser=await chromium.launch(require('./browser_test_support').launchOptions);
  try{
   for(const [w,h] of [[540,860],[360,640],[360,760],[390,844],[412,915],[390,915]]){
    const page=await browser.newPage({viewport:{width:w,height:h},hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));

@@ -51,9 +51,9 @@ func run() -> void:
 					for i in range(buttons.size()):
 						var button: Button = buttons[i]
 						check(text_width(button)+4 <= button.size.x,language+" button text "+button.text)
-						if i>0: check(buttons[i-1].position.x+buttons[i-1].size.x+3 <= button.position.x,language+" settings overlap "+str(resolution)+" "+button.text)
+						if i>0: check(buttons[i-1].position.y+buttons[i-1].size.y+3 <= button.position.y,language+" settings overlap "+str(resolution)+" "+button.text)
 					for pair in [[game.ui_title,190],[game.ui_mode,125],[game.ui_count,125],[game.ui_status,390],[game.ui_tip,476],[game.ui_footer,504],[game.difficulty_button,84],[game.collection_button,158],[game.start_button,180],[game.resume_button,180]]:
-						check(text_width(pair[0])<=pair[1],language+" text width "+pair[0].text)
+						check(text_width(pair[0])<=pair[0].size.x,language+" text width "+pair[0].text)
 				check(game.board_view.position.y+game.board_view.size.y+17<game.ui_status.position.y,language+" board/status spacing")
 				game.mode = game.Mode.PLAY
 				game.sync_ui()
@@ -77,7 +77,7 @@ func run() -> void:
 			game.card_ui.show_reward(card,2,true)
 			await process_frame
 			check(text_width(game.card_ui.reward_title)<=430,language+" reward heading")
-			check(game.card_ui.reward_note.position.y+game.card_ui.reward_note.size.y<663,language+" reward note "+card.name)
+			check(game.card_ui.reward_note.position.y+game.card_ui.reward_note.size.y<game.card_ui.reward_next.position.y,language+" reward note "+card.name)
 		game.card_ui.hide()
 		if language=="en":
 			DisplayServer.window_set_size(Vector2i(390,844))

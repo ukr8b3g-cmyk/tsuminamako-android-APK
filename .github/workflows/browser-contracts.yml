@@ -1,0 +1,36 @@
+name: Browser contracts
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install test-only browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Verify source hashes
+        run: python3 tools/update_build_metadata.py --check
+      - name: Verify browser logic
+        run: |
+          python3 tools/build_browser.py
+          for name in rules cards trivia card_art_locale demo_card_policy i18n lore_viewer browser_lore_v2_1; do
+            node "tests/test_${name}.js"
+          done
+      - name: Verify responsive settings in Chromium
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/namako-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server"' EXIT
+          node tests/test_visual_refresh_browser.js

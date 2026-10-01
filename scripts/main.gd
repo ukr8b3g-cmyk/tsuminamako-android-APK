@@ -116,6 +116,14 @@ var ui_footer: Label
 var ui_count: Label
 var music_button: Button
 const NightPalette = preload("res://scripts/night_palette.gd")
+var settings_open: bool = false
+var reduced_motion: bool = false
+var settings_button: Button
+var music_slider: HSlider
+var motion_button: Button
+var settings_layer: Control
+var settings_panel: Panel
+var settings_title: Label
 var dark_mode: bool = true
 var lcd_mode: bool = false
 var lcd_metal: Texture2D = preload("res://assets/lcd_metal.png")
@@ -137,6 +145,7 @@ var celebration_title: Label
 var celebration_note: Label
 
 func _ready() -> void:
+	get_tree().quit_on_go_back = false
 	DisplayServer.window_set_title(Locale.t("つみなまこ"))
 	# Changing the displayed project name must not strand existing collections.
 	if session_path.begins_with("user://"):
@@ -160,6 +169,7 @@ func _ready() -> void:
 	if appearance.load("user://namako_settings.cfg") == OK:
 		dark_mode = bool(appearance.get_value("appearance", "dark", true))
 		lcd_mode = bool(appearance.get_value("appearance", "lcd", false))
+		reduced_motion = bool(appearance.get_value("appearance", "reduced_motion", false))
 	board_view = BoardView.new()
 	board_view.position = BOARD_POS
 	board_view.size = BOARD_SIZE
@@ -175,6 +185,7 @@ func _ready() -> void:
 	add_child(trivia_ui)
 	trivia_ui.next_pressed.connect(finish_trivia)
 	trivia_ui.more_pressed.connect(func(): trivia_ui.show_episode(trivia.pick(reward_rng), trivia.episodes.size()))
+	build_settings()
 	get_viewport().size_changed.connect(refresh_layout)
 	refresh_layout()
 	begin_demo()
@@ -205,40 +216,45 @@ func apply_layout_for_size(window_size: Vector2i) -> void:
 	layout_height = maxf(860.0, 540.0 * float(window_size.y) / float(window_size.x))
 	layout_t = minf((layout_height - 860.0) / 280.0, 1.0)
 	var extra_height: float = layout_height - 860.0 - 280.0 * layout_t
-	control_h = 74.0 + 18.0 * layout_t
+	control_h = 96.0 + 8.0 * layout_t
 	control_y = layout_height - control_h - 32.0
 	var status_y: float = control_y - 30.0
-	settings_y = 55.0 + 45.0 * layout_t
+	settings_y = 90.0
 	settings_h = 38.0 + 34.0 * layout_t
-	tip_y = 97.0 + 79.0 * layout_t
+	tip_y = 102.0 + 30.0 * layout_t
 	tip_h = 45.0 + 9.0 * layout_t
-	hud_y = 147.0 + 92.0 * layout_t
+	hud_y = tip_y + tip_h + 10.0
 	hud_h = 23.0 + 20.0 * layout_t
 	board_view.cell_size = 45.0 + 14.0 * layout_t + minf(3.0, extra_height / 60.0)
 	board_view.cell_size = minf(board_view.cell_size, (status_y - 18.0 - (hud_y + 46.0)) / 12.0)
 	board_view.size = Vector2(board_view.cell_size * 8.0, board_view.cell_size * 12.0)
 	board_view.position = Vector2((540.0 - board_view.size.x) * 0.5, maxf(hud_y + 46.0, minf(180.0 + 103.0 * layout_t + extra_height * 0.35, status_y - 18.0 - board_view.size.y)))
-	ui_title.position = board_view.position + Vector2(75, 18)
-	ui_title.size = Vector2(board_view.size.x - 150, 46)
+	ui_title.position = board_view.position + Vector2(12, 14)
+	ui_title.size = Vector2(board_view.size.x - 110, 38)
+	ui_title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	ui_title.clip_text = true
 	ui_title.add_theme_font_size_override("font_size", 24)
 	ui_title.z_index = 1
-	ui_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ui_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	ui_kicker.position = Vector2(22, 43.0 + 29.0 * layout_t)
 	ui_kicker.visible = false
 	difficulty_button.position = Vector2(20, 8.0 + 12.0 * layout_t)
-	difficulty_button.size = Vector2(116, 42.0 + 22.0 * layout_t)
+	difficulty_button.size = Vector2(116, 74.0)
 	menu_button.position = Vector2(144, 8.0 + 12.0 * layout_t)
-	menu_button.size = Vector2(116, 42.0 + 22.0 * layout_t)
+	menu_button.size = Vector2(116, 74.0)
 	collection_button.position = Vector2(392, 8.0 + 12.0 * layout_t)
-	collection_button.size = Vector2(128, 42.0 + 22.0 * layout_t)
+	collection_button.size = Vector2(128, 74.0)
 	lore_button.position = Vector2(268, 8.0 + 12.0 * layout_t)
-	lore_button.size = Vector2(116, 42.0 + 22.0 * layout_t)
-	var settings_buttons: Array[Button] = [theme_button, track_button, speed_button, music_button, sfx_button]
-	var settings_x: Array[int] = [18, 102, 244, 348, 446]
-	var settings_w: Array[int] = [80, 138, 100, 94, 74]
-	for i in range(settings_buttons.size()):
-		settings_buttons[i].position = Vector2(settings_x[i], settings_y + 5.0)
-		settings_buttons[i].size = Vector2(settings_w[i], settings_h - 10.0)
+	lore_button.size = Vector2(116, 74.0)
+	if settings_panel != null:
+		settings_layer.size = Vector2(540, layout_height)
+		settings_panel.position = Vector2(40, (layout_height - 680) * 0.5)
+		settings_button.position = Vector2(20, 8 + 12 * layout_t)
+		settings_button.size = Vector2(94, 74.0)
+		for entry in [[difficulty_button, 120], [menu_button, 220], [lore_button, 320], [collection_button, 420]]:
+			entry[0].position.x = entry[1]
+			entry[0].size.x = 100 if entry[0] == collection_button else 94
+			entry[0].add_theme_font_size_override("font_size", 18)
 	ui_tip.position = Vector2(32, tip_y)
 	ui_tip.size = Vector2(476, tip_h)
 	ui_status.position = Vector2(75, status_y)
@@ -262,10 +278,10 @@ func apply_layout_for_size(window_size: Vector2i) -> void:
 	ui_fill.add_theme_font_size_override("font_size", 26)
 	target_label.position = Vector2(90, hud_y + 9.0)
 	target_label.size = Vector2(76, 18)
-	ui_mode.position = board_view.position + Vector2(65, 76)
-	ui_mode.size = Vector2(board_view.size.x - 130, 36)
-	ui_mode.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ui_mode.add_theme_font_size_override("font_size", 25)
+	ui_mode.position = board_view.position + Vector2(12, 54)
+	ui_mode.size = Vector2(board_view.size.x - 110, 26)
+	ui_mode.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	ui_mode.add_theme_font_size_override("font_size", 17)
 	ui_count.position = Vector2(395, hud_y)
 	ui_count.size = Vector2(125, 20)
 	next_label.position = Vector2(board_view.position.x + board_view.size.x - 145.0, board_view.position.y + 7.0)
@@ -288,9 +304,20 @@ func panel_style(fill: Color, radius: int = 16, border: Color = Color.TRANSPAREN
 	return style
 
 func set_chip_skin(button: Button, fill: Color, border: Color, ink: Color) -> void:
-	button.add_theme_stylebox_override("normal", panel_style(fill, 15, border))
-	button.add_theme_stylebox_override("hover", panel_style(fill.lightened(0.08), 15, border))
-	button.add_theme_stylebox_override("pressed", panel_style(fill.darkened(0.08), 15, border))
+	# Three bevel layers are UI geometry; no full-screen bitmap or 3D scene.
+	for state in ["normal", "hover", "pressed"]:
+		var pressed: bool = state == "pressed"
+		var box: StyleBoxFlat = panel_style(fill.lightened(0.08) if state == "hover" else fill, 40 if lcd_mode and (button in play_buttons or button in [start_button, resume_button]) else 18, border)
+		box.border_width_top = 2 if pressed else 3
+		box.border_width_left = 2
+		box.border_width_right = 2
+		box.border_width_bottom = 2 if pressed else 6
+		box.border_blend = true
+		box.shadow_color = Color(0.02, 0.10, 0.12, 0.24)
+		box.shadow_size = 2 if pressed else 5
+		box.shadow_offset = Vector2(0, 1 if pressed else 4)
+		box.content_margin_top = 4 if pressed else 0
+		button.add_theme_stylebox_override(state, box)
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
 		button.add_theme_color_override(state, ink)
 
@@ -545,6 +572,8 @@ func spawn_piece() -> void:
 	SessionStore.write(self, session_path)
 
 func _process(raw_delta: float) -> void:
+	if settings_open:
+		return
 	var delta: float = minf(raw_delta, 0.05)
 	clock += delta
 	save_clock += delta
@@ -832,6 +861,13 @@ func close_collection() -> void:
 	sound.play("click")
 	sync_ui()
 
+func approximate_remaining() -> int:
+	var cells_needed: int = maxi(0, int(ceil(target_ratio() * Rules.COLS * Rules.ROWS)) - model.fill_count())
+	var shape_cells: int = 0
+	for shape_cells_list in Rules.SHAPES:
+		shape_cells += shape_cells_list.size()
+	return int(ceil(float(cells_needed) / (float(shape_cells) / Rules.SHAPES.size())))
+
 func target_ratio() -> float:
 	return DIFFICULTY_TARGETS[difficulty_index]
 
@@ -918,15 +954,24 @@ func sync_ui() -> void:
 		theme_button.text = Locale.t("液晶") if lcd_mode else (Locale.t("夜モード") if dark_mode else Locale.t("昼モード"))
 	board_view.dark_mode = dark_mode
 	board_view.lcd_mode = lcd_mode
+	board_view.reduced_motion = reduced_motion
+	if settings_button != null:
+		settings_button.visible = mode in [Mode.DEMO, Mode.PLAY, Mode.PAUSED] and not collection_open
+		motion_button.text = Locale.t("演出を軽く: ") + ("ON" if reduced_motion else "OFF")
 	NightPalette.apply(self, dark_mode)
 	if trivia_ui != null: trivia_ui.apply_theme(dark_mode)
-	if card_ui != null: card_ui.apply_theme(dark_mode)
+	if card_ui != null:
+		card_ui.reduced_motion = reduced_motion
+		card_ui.apply_theme(dark_mode)
 	if ui_tip == null:
 		return
 	set_chip_skin(difficulty_button, Color("5a4639") if dark_mode else Color("ffe5ba"), Color("d3a16e") if dark_mode else Color("c79864"), Color("ffe7ba") if dark_mode else Color("755039"))
 	set_chip_skin(theme_button, Color("514274") if dark_mode else Color("e5d8fa"), Color("b7a1ef") if dark_mode else Color("b89bda"), Color("f5eaff") if dark_mode else Color("523770"))
 	set_chip_skin(speed_button, Color("6c5235") if dark_mode else Color("ffebb8"), Color("efc66a") if dark_mode else Color("e4bd59"), Color("fff0bf") if dark_mode else Color("765116"))
 	set_chip_skin(collection_button, Color("124c63") if dark_mode else Color("d5f4f3"), Color("66d3e8") if dark_mode else Color("54afbe"), Color("e3fcff") if dark_mode else Color("0e6f80"))
+	for button in play_buttons + [start_button, resume_button]:
+		var action: bool = button in [start_button, resume_button] or button == play_buttons.back()
+		set_chip_skin(button, Color("f56848") if action else (Color("215969") if dark_mode else Color("b9f1eb")), Color("a44435") if action else Color("369bad"), Color.WHITE if action or dark_mode else INK)
 	difficulty_button.text = Locale.t(DIFFICULTY_NAMES[difficulty_index])
 	target_label.text = "/ %d%%" % int(round(target_ratio() * 100.0))
 	board_view.show_ghost = mode == Mode.PLAY and difficulty_index != 2
@@ -938,24 +983,29 @@ func sync_ui() -> void:
 	start_button.position.x = 278 if has_session else 82
 	start_button.size.x = 180 if has_session else 376
 	track_button.text = "♪ " + Locale.t(sound.TRACK_NAMES[sound.track_index])
-	music_button.text = "BGM " + ("ON" if sound.music_enabled else "OFF")
+	music_button.text = "BGM " + ("ON" if sound.music_enabled else "OFF") + " %d%%" % int(round(sound.music_level * 100))
+	if music_slider != null: music_slider.set_value_no_signal(sound.music_level * 100)
 	sfx_button.text = "SE " + ("ON" if sound.sfx_enabled else "OFF")
 	speed_button.text = Locale.t("速さ ") + Locale.t(SPEED_LABELS[3 if speed_index == 4 and mode != Mode.DEMO else speed_index])
-	collection_button.text = Locale.t("図鑑 %d/%d") % [cards.owned_unique_count(), cards.enabled_cards().size()]
+	collection_button.text = Locale.t("図鑑") + "\n%d/%d" % [cards.owned_unique_count(), cards.enabled_cards().size()]
 	collection_button.visible = mode != Mode.DEMO and cards.rewards_enabled() and mode != Mode.CELEBRATE and mode != Mode.REVEAL and mode != Mode.TRIVIA and not collection_open
 	ui_mode.visible = mode == Mode.DEMO
-	ui_title.add_theme_font_size_override("font_size", 34 if mode == Mode.DEMO else 26)
+	ui_title.add_theme_font_size_override("font_size", 27 if Locale.is_japanese() else 22)
 	ui_title.modulate.a = 0.75
 	if lcd_mode:
-		for button in [theme_button,track_button,speed_button,music_button,sfx_button,difficulty_button,menu_button,lore_button,collection_button]:
-			set_chip_skin(button,Color("28636c"),Color("184f56"),Color.WHITE)
+		for button in [theme_button,track_button,speed_button,music_button,sfx_button,difficulty_button,menu_button,lore_button,collection_button,settings_button]:
+			if button != null: set_chip_skin(button,Color("28636c"),Color("184f56"),Color.WHITE)
 		for button in play_buttons + [start_button,resume_button]:
 			set_chip_skin(button,Color("df4d40"),Color("8d2c28"),Color.WHITE)
 		for label in [ui_title,ui_mode,ui_fill,ui_count,target_label,next_label,ui_tip,ui_status,ui_footer]:
 			label.add_theme_color_override("font_color",Color("263b39"))
+	if settings_panel != null:
+		settings_panel.add_theme_stylebox_override("panel", panel_style(Color("123540") if dark_mode and not lcd_mode else Color("eff9f5"), 24, Color("55aabd")))
+		settings_title.add_theme_color_override("font_color", Color("e4faf5") if dark_mode and not lcd_mode else INK)
+		set_chip_skin(motion_button, Color("215969") if dark_mode and not lcd_mode else Color("d6f5eb"), Color("55aabd"), Color.WHITE if dark_mode and not lcd_mode else INK)
 	ui_fill.text = "%d%%" % int(floor(model.fill_ratio() * 100.0))
 	board_view.next_preview = next_piece.duplicate()
-	ui_count.text = Locale.t("残った %d匹") % model.kept
+	ui_count.text = Locale.t("あと約%d匹") % approximate_remaining()
 	ui_mode.text = "AUTO DEMO" if mode == Mode.DEMO else ("FRIENDS PARTY" if mode == Mode.CELEBRATE else ("CARD GET" if mode == Mode.REVEAL else (Locale.t("研究手帖") if mode == Mode.TRIVIA else (Locale.t("ナマコの仲間たち") if cards.milestone_unlocked() else Locale.t("のんびり積もう")))))
 	menu_button.visible = mode == Mode.PLAY
 	lore_button.visible = mode in [Mode.DEMO, Mode.PLAY, Mode.PAUSED] and not collection_open
@@ -985,6 +1035,11 @@ func sync_ui() -> void:
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if settings_open:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+			close_settings()
+			get_viewport().set_input_as_handled()
+		return
 	var local_pointer := Vector2.ZERO
 	if event is InputEventMouseButton or event is InputEventMouseMotion:
 		local_pointer = get_global_transform_with_canvas().affine_inverse() * event.position
@@ -992,11 +1047,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		var key: int = event.keycode
 		if collection_open:
 			if not event.echo and key == KEY_ESCAPE:
-				close_collection()
+				if card_ui.zoom_button.visible: card_ui.zoom_button.hide()
+				else: close_collection()
 			return
 		if mode == Mode.TRIVIA:
 			if not event.echo and key in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
-				finish_trivia()
+				if is_instance_valid(trivia_ui.art_viewer):
+					trivia_ui.art_viewer.queue_free()
+					trivia_ui.art_viewer = null
+				else: finish_trivia()
 			return
 		if mode == Mode.REVEAL:
 			if not event.echo and key in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
@@ -1058,6 +1117,26 @@ func _unhandled_input(event: InputEvent) -> void:
 				break
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(board_view):
+		if settings_open:
+			close_settings()
+		elif collection_open:
+			if card_ui.zoom_button.visible: card_ui.zoom_button.hide()
+			else: close_collection()
+		elif mode == Mode.TRIVIA:
+			if is_instance_valid(trivia_ui.art_viewer):
+				trivia_ui.art_viewer.queue_free()
+				trivia_ui.art_viewer = null
+			else: finish_trivia()
+		elif mode == Mode.REVEAL:
+			finish_reward()
+		elif mode == Mode.PLAY:
+			pause_game()
+		elif mode == Mode.PAUSED:
+			modal_continue()
+		elif mode == Mode.DEMO:
+			get_tree().quit()
+		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		SessionStore.write(self, session_path)
 	if is_instance_valid(sound) and is_instance_valid(sound.music):
@@ -1080,8 +1159,6 @@ func _draw() -> void:
 		var y: float = fposmod(float(i) * 137.0 - clock * 4.0, layout_height)
 		var x: float = 46.0 if i % 2 == 0 else 487.0
 		draw_circle(Vector2(x + sin(clock * 0.6 + float(i)) * 9.0, y), float(3 + i % 4), Color(1, 1, 1, 0.7), false, 1.3, true)
-	draw_style_box(panel_style((Color("194b60") if dark_mode else Color("78bdd3")), 18), Rect2(12, settings_y - 2.0, 516, settings_h + 4.0))
-	draw_style_box(panel_style((Color("193944") if dark_mode else Color("ffffff")), 18, Color("3c95ad") if dark_mode else Color("78bdd3")), Rect2(12, settings_y - 4.0, 516, settings_h + 3.0))
 	draw_style_box(panel_style((Color("9c7741") if dark_mode else Color("e5bd6e")), 18), Rect2(20, tip_y + 2.0, 500, tip_h + 2.0))
 	draw_style_box(panel_style((Color("24445b") if dark_mode else Color("fff7df")), 18), Rect2(20, tip_y, 500, tip_h))
 	draw_style_box(panel_style((Color("174454") if dark_mode else Color("d9f1fa")), 12), Rect2(75, control_y - 30.0, 390, 24))
@@ -1114,3 +1191,66 @@ func draw_lcd_housing() -> void:
 		draw_circle(point,8.5,Color("667671"))
 		draw_circle(point-Vector2(0,1),7.5,Color("c7ceca"))
 		draw_line(point-Vector2(4,-2),point+Vector2(4,-2),Color("596965"),2,true)
+
+func build_settings() -> void:
+	settings_button = button_at(Locale.t("設定"), Rect2(20, 8, 94, 42), open_settings)
+	settings_button.add_theme_font_size_override("font_size", 18)
+	settings_layer = Control.new()
+	settings_layer.z_index = 50
+	settings_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(settings_layer)
+	var shade := ColorRect.new()
+	shade.color = Color(0.03, 0.10, 0.14, 0.70)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	settings_layer.add_child(shade)
+	settings_panel = Panel.new()
+	settings_panel.size = Vector2(460, 680)
+	settings_panel.add_theme_stylebox_override("panel", panel_style(Color("eff9f5"), 24, Color("55aabd")))
+	settings_panel.set_meta("night_palette_managed", true)
+	settings_layer.add_child(settings_panel)
+	settings_title = label_at(Locale.t("設定"), Vector2(24, 20), Vector2(412, 40), 28, INK, settings_panel)
+	settings_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var buttons: Array[Button] = [theme_button, track_button, speed_button, music_button, sfx_button]
+	for i in range(buttons.size()):
+		buttons[i].reparent(settings_panel)
+		buttons[i].position = Vector2(24, 76 + i * 84)
+		buttons[i].size = Vector2(412, 74)
+		buttons[i].add_theme_font_size_override("font_size", 20)
+	music_button.size.x = 196
+	music_slider = HSlider.new()
+	music_slider.position = Vector2(236, 328)
+	music_slider.size = Vector2(200, 74)
+	music_slider.min_value = 0
+	music_slider.max_value = 100
+	music_slider.step = 5
+	music_slider.value = sound.music_level * 100
+	music_slider.tooltip_text = Locale.t("BGM音量")
+	music_slider.value_changed.connect(func(value: float): sound.set_music_level(value / 100.0); sync_ui())
+	settings_panel.add_child(music_slider)
+	motion_button = button_at("", Rect2(24, 496, 412, 74), toggle_motion, false, settings_panel)
+	button_at(Locale.t("閉じる"), Rect2(100, 590, 260, 68), close_settings, true, settings_panel)
+	settings_layer.hide()
+	sync_ui()
+
+func open_settings() -> void:
+	if mode not in [Mode.DEMO, Mode.PLAY, Mode.PAUSED] or collection_open:
+		return
+	settings_open = true
+	pointer_down = false
+	board_view.frozen = true
+	settings_layer.show()
+	sync_ui()
+
+func close_settings() -> void:
+	settings_open = false
+	settings_layer.hide()
+	board_view.frozen = mode not in [Mode.DEMO, Mode.PLAY, Mode.CELEBRATE]
+	sync_ui()
+
+func toggle_motion() -> void:
+	reduced_motion = not reduced_motion
+	var config := ConfigFile.new()
+	config.load("user://namako_settings.cfg")
+	config.set_value("appearance", "reduced_motion", reduced_motion)
+	config.save("user://namako_settings.cfg")
+	sync_ui()

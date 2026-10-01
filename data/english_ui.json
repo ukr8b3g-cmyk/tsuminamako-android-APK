@@ -113,7 +113,7 @@
   "枚目）": " copies)",
   "枚": " cards",
   "匹": "",
-  "残った ": "Remaining ",
+  "残った ": "Stacked ",
   "水槽 ": "Tank ",
   "図鑑 ": "Cards ",
   "図鑑": "Cards",
@@ -176,8 +176,8 @@
   "眺めるだけでも、のんびり。": "Relax and watch the tank.",
   "自動デモ中  ·  ルールを見たらスタート  ·  速さボタンで変更": "Auto demo · Tap Start to play · Tap Speed to change pace",
   "海の研究ノートから、今日のひとこま。": "A moment from the ocean research notebook.",
-  "残った %d匹": "Remaining %d",
-  "%s\n水槽 %d%%  ·  残った %d匹": "%s\nTank %d%% · Remaining %d",
+  "残った %d匹": "Stacked %d",
+  "%s\n水槽 %d%%  ·  残った %d匹": "%s\nTank %d%% · Stacked %d",
   "Ⅱ ポーズ": "Ⅱ Pause",
   "ポーズ": "Pause",
   "博士": "Doctor",
@@ -185,5 +185,9 @@
   "博士のうんちくへ ▶": "Doctor's Notes ▶",
   "急がなくて大丈夫。\n「はじめから」で空の水槽からやり直せます。": "Take your time.\nTap New Game to restart with an empty tank.",
   "まどろみ": "Drowse",
-  "液晶": "LCD"
+  "液晶": "LCD",
+  "設定": "Settings",
+  "演出を軽く: ": "Reduce motion: ",
+  "あと約%d匹": "~%d to go",
+  "BGM音量": "Music volume"
 }

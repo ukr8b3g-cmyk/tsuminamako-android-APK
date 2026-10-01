@@ -1,3 +1,16 @@
+# v0.4.9 — Visual polish (development, not released)
+
+- Added approximate remaining-creature count without changing clear thresholds
+- Added persistent 0–100% music volume and per-track level balance
+- Added responsive Chromium settings checks for CI
+- Consolidated settings with a paused board, larger touch controls, and reduced motion
+- Raised button materials and gray-green LCD; fixed title and collection stacking
+- Restored easy-mode recommendation in the browser LCD renderer
+- Routed Android Back through overlays and pause; released closed collection textures
+- Added missing deterministic rule/locale fixtures and refreshed obsolete test expectations
+- Explicit texture import compression and smaller browser WebP assets
+- Reproducible metadata generation; no stale claim of a previously built APK
+
 # CHANGELOG
 
 ## 図鑑カード８枚追加 — 2026-09-30

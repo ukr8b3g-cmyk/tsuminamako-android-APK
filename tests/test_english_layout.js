@@ -19,7 +19,7 @@ async function inspect(page, name, ids){
  results.push({name,failures});
 }
 (async()=>{
- const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+ const browser=await chromium.launch(require('./browser_test_support').launchOptions);
  try{
   for(const locale of ['en','ja'])for(const [w,h,dpr] of [[540,860,1],[360,640,1],[360,800,3],[390,844,3],[412,915,3],[480,960,1],[635,1036,1],[1440,3200,1]]){
    const page=await browser.newPage({viewport:{width:w,height:h},deviceScaleFactor:dpr,hasTouch:true});

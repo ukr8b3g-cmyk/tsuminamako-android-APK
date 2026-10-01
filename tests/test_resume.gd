@@ -31,14 +31,15 @@ func run() -> void:
 	check(migrated.owned_unique_count() == 12 and not migrated.completion_seen, "legacy twelve-card save retains cards and reopens completion")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(legacy_path))
 	var game: Node = make_game()
-	var settings: Array = [game.theme_button, game.music_button, game.sfx_button, game.track_button, game.speed_button]
+	game.apply_layout_for_size(Vector2i(540,860))
+	var settings: Array = [game.theme_button, game.track_button, game.speed_button, game.music_button, game.sfx_button]
 	var settings_aligned: bool = true
 	for i in range(1, settings.size()):
-		settings_aligned = settings_aligned and settings[i].position.y == settings[0].position.y and settings[i].size.y == settings[0].size.y and settings[i - 1].position.x + settings[i - 1].size.x < settings[i].position.x
-	check(settings_aligned, "native settings have one aligned, non-overlapping row")
-	check(game.board_view.size == Vector2(BoardView.CELL * Rules.COLS, BoardView.CELL * Rules.ROWS), "native board has square aligned cells")
-	check(game.collection_button.position.y + game.collection_button.size.y < game.theme_button.position.y and game.ui_tip.position.y + game.ui_tip.size.y < game.ui_mode.position.y and game.ui_mode.position.y + game.ui_mode.size.y < game.board_view.position.y, "native header, tip and board are separated")
-	check(game.board_view.position.y + game.board_view.size.y < game.ui_status.position.y and game.ui_status.position.y + game.ui_status.size.y < game.start_button.position.y and game.start_button.position.y + game.start_button.size.y < game.ui_footer.position.y, "native board, message and buttons are separated")
+		settings_aligned = settings_aligned and settings[i].position.x == settings[0].position.x and settings[i - 1].position.y + settings[i - 1].size.y < settings[i].position.y
+	check(settings_aligned, "settings panel has non-overlapping touch controls")
+	check(game.board_view.size.is_equal_approx(Vector2(game.board_view.cell_size * Rules.COLS, game.board_view.cell_size * Rules.ROWS)), "native board has square aligned cells")
+	check(game.ui_title.position.y + game.ui_title.size.y <= game.ui_mode.position.y, "native title and demo caption are separated")
+	check(game.board_view.position.y + game.board_view.size.y < game.ui_status.position.y and game.ui_status.position.y + game.ui_status.size.y < game.start_button.position.y, "native board, message and buttons are separated")
 	game.begin_play()
 	game.hard_drop()
 	game.spawn_piece()
@@ -49,8 +50,8 @@ func run() -> void:
 	resumed.resume_saved()
 	check(resumed.mode == resumed.Mode.PAUSED, "resume waits for user")
 	check(resumed.model.board == game.model.board and resumed.active == game.active and resumed.origin == game.origin and resumed.next_piece == game.next_piece and resumed.model.random_state == game.model.random_state and resumed.model.bag == game.model.bag, "board, active, next and RNG roundtrip")
-	resumed.speed_index = 3
-	check(resumed.speed_multiplier() == 2.0, "Mach capped during play")
+	resumed.speed_index = 4
+	check(resumed.speed_multiplier() == 3.0, "Mach capped during play")
 	resumed.mode = resumed.Mode.DEMO
 	check(resumed.speed_multiplier() == 6.0, "Mach enabled in demo")
 	resumed.mode = resumed.Mode.PLAY

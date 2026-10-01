@@ -1,6 +1,6 @@
 const fs=require('fs'),assert=require('assert'),{chromium}=require('playwright');
 const root=require('path').resolve(__dirname,'..');
-(async()=>{const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});let checks=0;try{
+(async()=>{const browser=await chromium.launch(require('./browser_test_support').launchOptions);let checks=0;try{
 for(const lang of ['ja','en'])for(const size of [[360,640],[390,844],[412,915],[1440,3200],[1280,800]])for(const dark of [false,true]){
  const page=await browser.newPage({viewport:{width:size[0],height:size[1]},deviceScaleFactor:2});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setContent(fs.readFileSync(root+'/START.html','utf8').replace('<head>',`<head><script>window.NAMAKO_OS_LOCALE='${lang}';window.NAMAKO_TEST_MODE=true;</script>`));await page.waitForFunction(()=>window.__namako);

@@ -3,3 +3,10 @@
 *.keystore
 *.jks
 builds/
+node_modules/
+__pycache__/
+tests/*_validation/
+tests/*_results.json
+tests/*.png
+tests/*.cfg
+/START.html

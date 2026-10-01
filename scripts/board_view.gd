@@ -3,9 +3,10 @@ extends Control
 const Rules = preload("res://scripts/rules.gd")
 const CELL: float = 46.0
 var cell_size: float = CELL
-const COLORS: Array[Color] = [Color("f7869b"), Color("58c9c7"), Color("f6ce6e"), Color("92c980"), Color("b398e6"), Color("f5aa74")]
+const COLORS: Array[Color] = [Color("ff668b"), Color("22c6c5"), Color("ffc44c"), Color("85ce47"), Color("9a79e8"), Color("ffa35c")]
 var rotation_from: Array[Vector2] = []
 var rotation_time: float = 1.0
+var reduced_motion: bool = false
 var dark_mode: bool = false
 var lcd_mode: bool = false
 var model: Rules
@@ -43,11 +44,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if not frozen:
-		clock += delta
+		if not reduced_motion: clock += delta
 		rotation_time = minf(1.0, rotation_time + delta / 0.28)
 		if celebration_active:
 			celebration_clock += delta
-		visual_origin = visual_origin.lerp(Vector2(origin), 1.0 - exp(-delta * 18.0))
+		visual_origin = Vector2(origin) if reduced_motion else visual_origin.lerp(Vector2(origin), 1.0 - exp(-delta * 18.0))
 	queue_redraw()
 
 func reset_visuals() -> void:
@@ -71,9 +72,9 @@ func reset_visuals() -> void:
 func start_celebration() -> void:
 	celebration_active = true
 	celebration_clock = 0.0
-	burst(Vector2(64, 110), Color("f6ce6e"), false, true)
-	burst(Vector2(168, 245), Color("f7869b"), false, true)
-	burst(Vector2(272, 130), Color("58c9c7"), false, true)
+	burst(Vector2(64, 110), Color("ffc44c"), false, true)
+	burst(Vector2(168, 245), Color("ff668b"), false, true)
+	burst(Vector2(272, 130), Color("22c6c5"), false, true)
 
 func stop_celebration() -> void:
 	celebration_active = false
@@ -104,6 +105,7 @@ func clear_vanish() -> void:
 	vanish_cells.clear()
 
 func burst(center: Vector2, color: Color, downward: bool = false, celebration: bool = false) -> void:
+	if reduced_motion: return
 	var particles: CPUParticles2D = CPUParticles2D.new()
 	particles.position = center
 	particles.texture = bubble_texture
@@ -247,25 +249,26 @@ func _draw() -> void:
 func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: float, id_value: int, deformation: float) -> void:
 	if cells.is_empty():
 		return
+	if reduced_motion: deformation = 0.0
 	var points: Array[Vector2] = []
 	var middle: Vector2 = Vector2.ZERO
 	for cell in cells:
 		middle += (Vector2(cell) + Vector2(0.5, 0.5)) * cell_size + offset
 	middle /= float(cells.size())
 	var party_wave: float = 0.0
-	if celebration_active and id_value > 0:
+	if celebration_active and id_value > 0 and not reduced_motion:
 		party_wave = sin(celebration_clock * 8.0 + float(id_value) * 1.71)
 		deformation += party_wave * 0.18
-	if id_value > 0:
+	if id_value > 0 and not reduced_motion:
 		deformation += sin(clock * 1.9 + float(id_value) * 0.8) * 0.055
 	for i in range(cells.size()):
 		var point: Vector2 = (Vector2(cells[i]) + Vector2(0.5, 0.5)) * cell_size + offset
 		point = middle + (point - middle) * Vector2(1.0 + deformation * 0.24, 1.0 - absf(deformation) * 0.42)
 		point.y += sin(clock * 3.0 + float(i) * 1.1 + float(id_value)) * (1.2 if id_value == 0 else 0.45)
-		if celebration_active and id_value > 0:
+		if celebration_active and id_value > 0 and not reduced_motion:
 			point.x += sin(celebration_clock * 9.0 + float(i) * 0.9 + float(id_value)) * 4.2
 			point.y += cos(celebration_clock * 10.0 + float(i) + float(id_value)) * 3.1
-		if id_value == 0 and rotation_time < 1.0 and i < rotation_from.size():
+		if not reduced_motion and id_value == 0 and rotation_time < 1.0 and i < rotation_from.size():
 			var old: Vector2 = rotation_from[i]
 			var delta: Vector2 = point-old
 			var t: float = rotation_time
@@ -273,7 +276,7 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 		points.append(point)
 	var radius: float = cell_size * 0.425 * (1.0 - maxf(-deformation, 0.0) * 0.7)
 	if lcd_mode:
-		var ink := Color(Color("263129"),alpha)
+		var ink := Color(Color("4b5544"),alpha)
 		for i in range(cells.size()):
 			for j in range(i+1,cells.size()):
 				var d: Vector2i = cells[i]-cells[j]
@@ -287,11 +290,11 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 		draw_circle(head+Vector2(5,-3),2.6,face)
 		draw_arc(head+Vector2(0,1),4,0.1,PI-0.1,10,face,1.3,true)
 		return
-	var shadow: Color = Color(color.darkened(0.25), alpha * 0.60)
+	var shadow: Color = Color(color.darkened(0.40), alpha * 0.70)
 	var body: Color = Color(color, alpha)
 	for layer in range(3):
-		var shift: Vector2 = Vector2(0, 2.5) if layer == 0 else Vector2.ZERO
-		var ink: Color = shadow if layer == 0 else (Color(1, 1, 1, alpha * 0.12) if layer == 2 else body)
+		var shift: Vector2 = Vector2(0, cell_size * 0.08) if layer == 0 else Vector2.ZERO
+		var ink: Color = shadow if layer == 0 else (Color(1, 1, 1, alpha * 0.18) if layer == 2 else body)
 		var r: float = radius + 1.3 if layer == 0 else (radius * 0.72 if layer == 2 else radius)
 		for i in range(cells.size()):
 			for j in range(i + 1, cells.size()):
@@ -321,7 +324,12 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 	draw_circle(head + Vector2(10, 3.5), 2.7, Color(1, 1, 1, alpha * 0.25))
 
 func draw_lcd_board() -> void:
-	draw_rect(Rect2(Vector2.ZERO,size),Color("b5c0a3"))
+	# LCD polarizer: a subtle vertical tint and inset shadow, bounded draw cost.
+	for band in range(24):
+		var tint: Color = Color("c6cdb1").lerp(Color("aeb997"), float(band) / 23.0)
+		draw_rect(Rect2(0, float(band) * size.y / 24.0, size.x, size.y / 24.0 + 1), tint)
+	for edge in range(4):
+		draw_rect(Rect2(edge, edge, size.x - edge * 2, size.y - edge * 2), Color(0.15, 0.20, 0.11, 0.08), false, 1)
 	for y in range(Rules.ROWS+1):
 		draw_dashed_line(Vector2(0,y*cell_size),Vector2(size.x,y*cell_size),Color("68785a36"),1,2,true,true)
 	for x in range(Rules.COLS+1):
@@ -346,7 +354,7 @@ func draw_lcd_board() -> void:
 		for cell in cells:
 			for other in cells:
 				if other==cell+Vector2i.RIGHT or other==cell+Vector2i.DOWN:
-					draw_line(center+Vector2(cell)*11,center+Vector2(other)*11,Color("263129"),9,true)
-			draw_circle(center+Vector2(cell)*11,5.5,Color("263129"))
-	draw_line(Vector2(0,size.y-2),Vector2(size.x,size.y-2),Color("263129"),3)
+					draw_line(center+Vector2(cell)*11,center+Vector2(other)*11,Color("4b5544"),9,true)
+			draw_circle(center+Vector2(cell)*11,5.5,Color("4b5544"))
+	draw_line(Vector2(0,size.y-2),Vector2(size.x,size.y-2),Color("4b5544"),3)
 	draw_rect(Rect2(1,1,size.x-2,size.y-2),Color("697660"),false,2)

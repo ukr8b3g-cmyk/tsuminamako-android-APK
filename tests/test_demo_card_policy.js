@@ -28,7 +28,7 @@ const app=Object.create(App.prototype);
 app.mode='demo';app.rewardFromDemo=false;app.collectionOpen=false;app.difficultyIndex=1;app.speedIndex=0;app.phase=0;app.demoClock=0;
 app.audio={trackLabel:()=>'潮の庭',musicEnabled:true,sfxEnabled:true,play(){}};
 app.cards={rewardsEnabled:()=>true,milestoneUnlocked:()=>false,ownedUnique:()=>0,enabledCards:()=>[{id:'card-1'}]};
-app.model={fillRatio:()=>0,kept:0};app.celebrationMessage='';
+app.model={fillRatio:()=>0,fillCount:()=>0,kept:0};app.celebrationMessage='';
 app.rewardView={showCollection(){throw Error('demo opened collection');}};
 app.sync();
 assert.equal(element('cards-button').hidden,true);

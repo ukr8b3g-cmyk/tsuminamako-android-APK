@@ -237,7 +237,7 @@ h1.demo-title,html[lang="en"] h1.demo-title{font-size:34px;line-height:42px}
 #footer,html[lang="en"] #footer{font-size:14px}
 #lcd-hardware{display:none}
 html[data-theme="lcd"] body{background:#233d40}
-html[data-theme="lcd"] #stage{background:#c5c9c8 url("assets/lcd_metal.png") center/cover;box-shadow:inset 0 0 0 8px #2d777e,inset 0 0 0 12px #204a50;border-radius:28px}
+html[data-theme="lcd"] #stage{background:#c5c9c8 url("assets/lcd_metal.webp") center/cover;box-shadow:inset 0 0 0 8px #2d777e,inset 0 0 0 12px #204a50;border-radius:28px}
 html[data-theme="lcd"] #lcd-hardware{display:block;position:absolute;inset:0;pointer-events:none}
 #lcd-hardware i{position:absolute;width:11px;height:11px;border:1px solid #606b6b;border-radius:50%;background:linear-gradient(135deg,#edf0ec,#859391);box-shadow:0 1px 2px #0006}
 #lcd-hardware i:after{content:"";position:absolute;top:4px;left:1px;width:7px;height:1px;background:#61716f;transform:rotate(-35deg)}
@@ -252,3 +252,33 @@ html[data-theme="lcd"] #stage{background-size:440px 440px;background-blend-mode:
 html[data-theme="lcd"] #start,html[data-theme="lcd"] #resume-save,html[data-theme="lcd"] #controls>button{background:linear-gradient(#ef6152,#c73c32)!important;border-color:#8d2c28!important;box-shadow:0 5px 0 #8d2c28,0 7px 7px #0004!important}#footer{line-height:20px!important;font-size:13px!important}html[lang="en"] #footer{font-size:12px!important}
 
 #lcd-hardware i{width:17px;height:17px}#lcd-hardware i:after{top:7px;left:3px;width:9px;height:2px}#lcd-hardware i:nth-child(1),#lcd-hardware i:nth-child(3){left:7px}#lcd-hardware i:nth-child(2),#lcd-hardware i:nth-child(4){right:7px}
+
+/* Shared compact header: never wrap the game title into AUTO DEMO. */
+h1,h1.demo-title,html[lang="en"] h1,html[lang="en"] h1.demo-title{font-size:27px;line-height:38px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[lang="en"] h1,html[lang="en"] h1.demo-title{font-size:22px}
+#mode,html[lang="en"] #mode{font-size:17px;line-height:26px;text-align:left}
+#collection-title{position:static;left:auto;top:auto;width:auto;margin:0 96px 2px 0;text-align:left;font-size:26px;line-height:40px;white-space:nowrap}
+
+/* Tactile, scalable button materials. */
+button{border-top-color:#ffffffa0;box-shadow:inset 0 2px 0 #ffffff70,inset 0 -4px 0 #143e4320,0 5px 0 #488e95,0 8px 10px #16373c24;background-image:linear-gradient(#ffffff35,#ffffff00 45%,#12384710)}
+button.primary{background-color:#ec775d;box-shadow:inset 0 2px 0 #ffffff70,inset 0 -4px 0 #a4443530,0 5px 0 #a44435,0 8px 12px #16373c28}
+button:active,html[data-theme="lcd"] button:active{transform:translateY(3px);box-shadow:inset 0 2px 4px #12384730,0 2px 0 #34545a!important}
+html[data-theme="lcd"] h1,html[data-theme="lcd"] #mode{color:#4b5544}
+
+#settings-open{z-index:2}
+#settings-layer{position:absolute;inset:0;z-index:50;background:#081a24b3;touch-action:manipulation}
+#settings-panel{position:absolute;left:40px;width:460px;height:480px;border:2px solid #55aabd;border-radius:24px;background:#eff9f5;color:#254b50;box-shadow:0 15px 45px #081a2460}
+#settings-title{position:absolute;left:24px;top:20px;width:412px;height:40px;margin:0;text-align:center;font-size:28px;line-height:40px}
+#motion-toggle{left:24px;top:356px;width:412px;height:46px;font-size:20px}
+#settings-close{left:100px;top:414px;width:260px;height:48px}
+html[data-theme="dark"] #settings-panel{background:#123540;color:#e4faf5}
+html[data-theme="lcd"] #settings-panel button{background:linear-gradient(#527b7d,#27575e);color:#fff;border-color:#234c52}
+html[data-reduced="true"] *,html[data-reduced="true"] *:before,html[data-reduced="true"] *:after{animation:none!important;transition:none!important}
+/* Overlays must cover the in-tank title and HUD, including their z-index. */
+#shade{z-index:10}#modal,#celebrate-banner{z-index:11}#reward,#trivia{z-index:20}#collection{z-index:30}
+
+#settings-panel{height:680px}#motion-toggle{top:496px;height:74px}#settings-close{top:590px;height:68px}
+
+button.primary{background-color:#f56848}html[data-theme="light"] #controls>button:not(.primary){background-color:#b9f1eb}#settings-open{font-size:18px}html[data-theme="lcd"] #controls>button{border-radius:40px}
+
+#music-volume{position:absolute;left:236px;top:328px;width:200px;height:74px;accent-color:#218f9f;cursor:pointer}#cards-button{white-space:pre-line;line-height:1.2}

@@ -36,5 +36,5 @@ class NamakoRewardView {
   zoom.onclick=()=>this.hideZoom();document.getElementById('collection').append(zoom);zoom.focus();
  }
  hideZoom(){const zoom=document.getElementById('card-zoom');if(zoom){zoom.remove();if(this.zoomSource)this.zoomSource.focus();}this.zoomSource=null;}
- hideCollection(){this.hideZoom();document.getElementById('collection').hidden=true;}
+ hideCollection(){this.hideZoom();document.getElementById('collection').hidden=true;document.getElementById('collection-grid').replaceChildren();}
 }

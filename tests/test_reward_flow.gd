@@ -15,6 +15,7 @@ func _initialize() -> void:
 	call_deferred("run_checks")
 
 func run_checks() -> void:
+	load("res://scripts/locale_text.gd").test_language = "ja"
 	var main: Node = load("res://Main.tscn").instantiate()
 	main.session_path = "res://tests/_resume_test.cfg"
 	root.add_child(main)
@@ -34,7 +35,7 @@ func run_checks() -> void:
 	main.sync_ui()
 	main.dark_mode = true
 	main.sync_ui()
-	check(main.board_view.dark_mode and main.theme_button.text == "昼モード", "native dark theme applied")
+	check(main.board_view.dark_mode and main.theme_button.text == "夜モード", "native dark theme applied")
 	check(main.sound.players.has("card_pop") and main.sound.players.has("card_rare"), "new reward fanfares loaded")
 	check(main.cards.rewards_enabled(), "20-card rewards enabled")
 	check(main.cards.enabled_cards().size() == 20, "20 cards in catalog")
@@ -66,7 +67,7 @@ func run_checks() -> void:
 	main.mode = main.Mode.DEMO
 	main.show_clear(true)
 	main.finish_celebration()
-	check(main.mode == main.Mode.REVEAL and main.reward_from_demo, "demo clear reveals a collectible card")
+	check(main.mode == main.Mode.TRIVIA and main.reward_from_demo and not main.card_ui.reward_panel.visible, "demo clear skips collectible rewards")
 	main.finish_reward()
 	check(main.mode == main.Mode.TRIVIA and main.demo_overlay_time > 0.0, "demo continues to professor episode")
 	main.finish_trivia()

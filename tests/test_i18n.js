@@ -38,7 +38,7 @@ for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-
   const game=read('browser/game.js');
   vm.runInContext(game.slice(0,game.indexOf('const game=new NamakoApp();'))+'\nglobalThis.TestApp=NamakoApp;',sandbox);
   const app=Object.create(sandbox.TestApp.prototype);
-  Object.assign(app,{model:{fillRatio:()=>.1,kept:10},cards:{rewardsEnabled:()=>true,ownedUnique:()=>2,enabledCards:()=>Array(20).fill({}),milestoneUnlocked:()=>false},audio:{trackLabel:()=>'Tide Garden',musicEnabled:true,sfxEnabled:true,play(){}},difficultyIndex:1,speedIndex:0,phase:0,demoClock:0,collectionOpen:false,celebrationMessage:'A new friend!',rewardFromDemo:false,lastReward:{name:'Jade Namako'},trivia:{episodes:en.lore.entries}});
+  Object.assign(app,{model:{fillRatio:()=>10/96,fillCount:()=>10,kept:10},cards:{rewardsEnabled:()=>true,ownedUnique:()=>2,enabledCards:()=>Array(20).fill({}),milestoneUnlocked:()=>false},audio:{trackLabel:()=>'Tide Garden',musicEnabled:true,sfxEnabled:true,play(){}},difficultyIndex:1,speedIndex:0,phase:0,demoClock:0,collectionOpen:false,celebrationMessage:'A new friend!',rewardFromDemo:false,lastReward:{name:'Jade Namako'},trivia:{episodes:en.lore.entries}});
   for(const mode of ['demo','play','paused','clear','celebrate','reveal','trivia']){
    app.mode=mode;app.sync();if(mode==='trivia')app.renderTrivia(en.lore.entries[0]);
    for(const [id,element]of elements)assert(!/[ぁ-んァ-ヶ一-龯]/u.test(element.textContent+JSON.stringify(element.attrs)),mode+' '+id);
@@ -49,6 +49,6 @@ for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-
 }
 const standalone=read('START.html');
 assert(standalone.includes('window.NAMAKO_EN='));
-assert.equal((standalone.match(/data-en-src="data:image\/png;base64,/g)||[]).length,3);
+assert.equal((standalone.match(/data-en-src="data:image\/webp;base64,/g)||[]).length,3);
 assert(!standalone.includes('<script src='));
 console.log('PASS: primary locale ja => Japanese; all others => English; 100 stories, UI literal/HTML coverage, 3 embedded English character images.');

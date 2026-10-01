@@ -7,7 +7,7 @@ const {chromium}=require('playwright');
 
 (async()=>{
  const root=path.resolve(__dirname,'..');
- const edge='C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+ const edge=require('./browser_test_support').launchOptions.executablePath;
  const browser=await chromium.launch({headless:true,executablePath:fs.existsSync(edge)?edge:undefined,args:['--autoplay-policy=no-user-gesture-required']});
  try{
   const page=await browser.newPage({viewport:{width:540,height:860}});

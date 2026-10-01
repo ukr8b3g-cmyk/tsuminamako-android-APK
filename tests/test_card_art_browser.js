@@ -2,7 +2,7 @@ const fs=require('fs'), assert=require('assert');
 const {chromium}=require('playwright');
 const root=require('path').resolve(__dirname,'..');
 (async()=>{
- const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+ const browser=await chromium.launch(require('./browser_test_support').launchOptions);
  try {
   for(const lang of ['ja','en','fr']){
    const page=await browser.newPage({viewport:{width:432,height:960}});

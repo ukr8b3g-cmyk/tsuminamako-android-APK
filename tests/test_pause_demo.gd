@@ -1,6 +1,7 @@
 extends SceneTree
 func _initialize(): call_deferred("run")
 func run():
+ load("res://scripts/locale_text.gd").test_language = "ja"
  var g=load("res://Main.tscn").instantiate()
  g.session_path="res://tests/_pause_demo_session.cfg"
  root.add_child(g)

@@ -30,7 +30,7 @@ func run() -> void:
 		ok = ok and game.trivia_ui.next_button.position.y + game.trivia_ui.next_button.size.y <= outer.size.y
 		ok = ok and game.difficulty_button.position.x + game.difficulty_button.size.x < game.menu_button.position.x
 		ok = ok and game.menu_button.position.x + game.menu_button.size.x < game.collection_button.position.x
-		ok = ok and game.collection_button.position.y + game.collection_button.size.y < game.theme_button.position.y
+		ok = ok and game.theme_button.get_parent() == game.settings_panel
 		check(ok, "trivia and difficulty fit " + str(resolution))
 	game.queue_free()
 	await process_frame

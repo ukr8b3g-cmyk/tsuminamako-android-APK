@@ -114,7 +114,7 @@
     "枚目）": " copies)",
     "枚": " cards",
     "匹": "",
-    "残った ": "Remaining ",
+    "残った ": "Stacked ",
     "水槽 ": "Tank ",
     "図鑑 ": "Cards ",
     "図鑑": "Cards",
@@ -166,7 +166,11 @@
     "急がなくて大丈夫。\n「はじめから」で空の水槽からやり直せます。": "Take your time.\nTap New Game to restart with an empty tank.",
     "まどろみ": "Drowse",
     "液晶": "LCD",
-    "表示モードを切替": "Change display mode"
+    "表示モードを切替": "Change display mode",
+    "設定": "Settings",
+    "演出を軽く: ": "Reduce motion: ",
+    "あと約%d匹": "~%d to go",
+    "BGM音量": "Music volume"
   },
   "lore": {
     "version": "2.1",

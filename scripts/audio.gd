@@ -5,8 +5,11 @@ const Locale = preload("res://scripts/locale_text.gd")
 
 const SFX_NAMES: Array[String] = ["move", "rotate", "drop", "stick", "slip", "click", "start", "clear", "fanfare", "card_pop", "card_rare"]
 const TRACKS: Array[String] = ["tide_garden", "bubble_parade", "moon_pool", "aquarium_air", "drowse"]
+# Measured PCM RMS trims; keep the five existing tracks at a similar level.
+const TRACK_TRIMS_DB: Array[float] = [0.6, -1.0, -0.4, 2.7, 1.1]
 const TRACK_NAMES: Array[String] = ["潮の庭", "ぽにゅ散歩", "月の水槽", "水槽の呼吸", "まどろみ"]
 var track_index: int = 0
+var music_level: float = 0.7
 var music_enabled: bool = true
 var sfx_enabled: bool = true
 var music: AudioStreamPlayer
@@ -20,6 +23,8 @@ func _ready() -> void:
 	if config.load(settings_path) == OK:
 		track_index = clampi(int(config.get_value("audio", "track", 0)), 0, TRACKS.size() - 1)
 		music_enabled = bool(config.get_value("audio", "music", true))
+		music_level = clampf(float(config.get_value("audio", "level", 0.7)), 0.0, 1.0)
+		if not is_finite(music_level): music_level = 0.7
 		sfx_enabled = bool(config.get_value("audio", "sfx", true))
 	music = AudioStreamPlayer.new()
 	music.name = "Music"
@@ -61,12 +66,14 @@ func set_celebration(is_celebrating: bool) -> void:
 func update_music_level() -> void:
 	if music == null:
 		return
-	if celebration_mode:
-		music.volume_db = -11.0
-	elif demo_mode:
-		music.volume_db = -4.0
-	else:
-		music.volume_db = 0.0
+	var duck: float = 0.4 if celebration_mode else (0.65 if demo_mode else 1.0)
+	var gain: float = music_level * 0.7 * duck * db_to_linear(TRACK_TRIMS_DB[track_index])
+	music.volume_db = linear_to_db(gain) if gain > 0.0 else -80.0
+
+func set_music_level(level: float) -> void:
+	music_level = clampf(level, 0.0, 1.0) if is_finite(level) else 0.7
+	update_music_level()
+	save_settings()
 
 func cycle_track() -> void:
 	track_index = (track_index + 1) % TRACKS.size()
@@ -94,6 +101,7 @@ func toggle_sfx() -> void:
 		play("click")
 
 func apply_settings() -> void:
+	update_music_level()
 	var music_bus: int = AudioServer.get_bus_index("Music")
 	var sfx_bus: int = AudioServer.get_bus_index("SFX")
 	if music_bus >= 0:
@@ -111,6 +119,7 @@ func save_settings() -> void:
 	config.load(settings_path)
 	config.set_value("audio", "track", track_index)
 	config.set_value("audio", "music", music_enabled)
+	config.set_value("audio", "level", music_level)
 	config.set_value("audio", "sfx", sfx_enabled)
 	var error: Error = config.save(settings_path)
 	if error != OK:

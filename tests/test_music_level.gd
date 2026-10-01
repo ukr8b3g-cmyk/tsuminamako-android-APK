@@ -1,0 +1,30 @@
+extends SceneTree
+const Sound = preload("res://scripts/audio.gd")
+func _initialize() -> void: call_deferred("run")
+func run() -> void:
+	var sound := Sound.new()
+	sound.settings_path = "user://music_level_test.cfg"
+	root.add_child(sound)
+	sound.set_demo(false)
+	sound.set_music_level(0.7)
+	assert(is_equal_approx(db_to_linear(sound.music.volume_db), 0.49 * db_to_linear(Sound.TRACK_TRIMS_DB[sound.track_index])))
+	sound.toggle_music()
+	assert(not sound.music_enabled)
+	sound.set_music_level(0.5)
+	assert(not sound.music_enabled, "Volume changes must preserve mute")
+	sound.cycle_track()
+	assert(not sound.music_enabled and is_equal_approx(sound.music_level, 0.5))
+	sound.set_music_level(0.0)
+	assert(sound.music.volume_db == -80.0)
+	sound.set_music_level(2.0)
+	assert(sound.music_level == 1.0)
+	var restored := Sound.new()
+	restored.settings_path = sound.settings_path
+	root.add_child(restored)
+	assert(restored.music_level == 1.0 and not restored.music_enabled)
+	sound.queue_free()
+	restored.queue_free()
+	await process_frame
+	DirAccess.remove_absolute("user://music_level_test.cfg")
+	print("MUSIC LEVEL PASS: gain, bounds, zero, mute, track switch and restore")
+	quit()

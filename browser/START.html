@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>つみなまこ v0.4.7 — ツミナマコ研究手帖</title>
+<title>つみなまこ v0.4.9 — ツミナマコ研究手帖</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="wrap"><main id="stage" aria-label="つみなまこ">
 <div id="lcd-hardware" aria-hidden="true"><i></i><i></i><i></i><i></i><span></span></div><canvas id="canvas" width="540" height="860" aria-label="ナマコを残して水槽を80%埋める落ち物ゲーム"></canvas>
-<h1>つみなまこ</h1><button id="difficulty" class="small" aria-label="難易度を変更。現在ふつう">ふつう</button><button id="track" class="small" title="BGMの曲を切替">♪ 潮の庭</button>
+<h1>つみなまこ</h1><button id="settings-open" class="small">設定</button><button id="difficulty" class="small" aria-label="難易度を変更。現在ふつう">ふつう</button><button id="track" class="small" title="BGMの曲を切替">♪ 潮の庭</button>
 <button id="theme" class="small" aria-label="ダークモード切替" aria-pressed="false">夜モード</button>
 <button id="music" class="small" title="BGMのオン／オフ">BGM ON</button>
 <button id="sfx" class="small" title="効果音のオン／オフ">SE ON</button>
@@ -28,6 +28,7 @@
 <button id="drop" class="primary" title="一気に落とす（Space）">落とす ↓</button>
 </div>
 <div id="footer"></div>
+<div id="settings-layer" hidden><section id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title"><h2 id="settings-title">設定</h2><input id="music-volume" type="range" min="0" max="100" step="5" value="70" aria-label="BGM音量"><button id="motion-toggle">演出を軽く: OFF</button><button id="settings-close" class="primary">閉じる</button></section></div>
 <div id="shade" hidden></div>
 <section id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
 <h2 id="modal-title"></h2><div id="modal-note"></div>
@@ -45,7 +46,7 @@
 </section>
 <section id="trivia" role="dialog" aria-modal="true" aria-labelledby="trivia-title" hidden>
 <div id="trivia-heading" class="trivia-heading">✦ １面クリア ✦</div>
-<div class="trivia-lab"><button id="trivia-professor-open" class="trivia-professor-open" type="button" aria-label="博士のカードを見る"><img id="trivia-professor" src="../assets/professor_gabo.webp" alt="白髪と丸眼鏡、白衣の博士"></button><div class="trivia-speech">わしは<br>『つみなまこ』研究の<br>博士である。</div><div class="trivia-companions"><button id="trivia-dog-open" class="trivia-companion" type="button" aria-label="犬のコリ助のカードを見る"><img id="trivia-dog-card" src="assets/trivia_korisuke.png" data-en-src="assets/trivia_korisuke_en.png" alt="助手の犬コリ助のカード"><span>コリ助</span></button><button id="trivia-dolphin-open" class="trivia-companion" type="button" aria-label="イルカのプレ号のカードを見る"><img id="trivia-dolphin-card" src="assets/trivia_corinpre.png" data-en-src="assets/trivia_corinpre_en.png" alt="イルカのプレ号のカード"><span>プレ号</span></button></div><img id="trivia-professor-card" src="assets/trivia_professor.png" data-en-src="assets/trivia_professor_en.png" alt="" hidden></div>
+<div class="trivia-lab"><button id="trivia-professor-open" class="trivia-professor-open" type="button" aria-label="博士のカードを見る"><img id="trivia-professor" src="../assets/professor_gabo.webp" alt="白髪と丸眼鏡、白衣の博士"></button><div class="trivia-speech">わしは<br>『つみなまこ』研究の<br>博士である。</div><div class="trivia-companions"><button id="trivia-dog-open" class="trivia-companion" type="button" aria-label="犬のコリ助のカードを見る"><img id="trivia-dog-card" src="assets/trivia_korisuke.webp" data-en-src="assets/trivia_korisuke_en.webp" alt="助手の犬コリ助のカード"><span>コリ助</span></button><button id="trivia-dolphin-open" class="trivia-companion" type="button" aria-label="イルカのプレ号のカードを見る"><img id="trivia-dolphin-card" src="assets/trivia_corinpre.webp" data-en-src="assets/trivia_corinpre_en.webp" alt="イルカのプレ号のカード"><span>プレ号</span></button></div><img id="trivia-professor-card" src="assets/trivia_professor.webp" data-en-src="assets/trivia_professor_en.webp" alt="" hidden></div>
 <div class="trivia-name">ガボジョイック・ベヘソナー博士</div>
 <article id="trivia-paper" class="trivia-paper"><div id="trivia-number">研究手帖 001 / 100</div><h2 id="trivia-title"></h2><p id="trivia-body"></p></article>
 <div class="trivia-footnote">ツミナマコは架空の生き物です。</div>

@@ -15,6 +15,7 @@ var collection_panel: Panel
 var reward_slot: Control
 var reward_back: Panel
 var reward_front: TextureRect
+var reduced_motion: bool = false
 var reward_next: Button
 var reward_title: Label
 var reward_note: Label
@@ -57,7 +58,7 @@ func set_layout_height(height: float) -> void:
 	reward_panel.position = Vector2(20, 16)
 	reward_panel.size = Vector2(500, height - 32.0)
 	var panel_height := reward_panel.size.y
-	var area_height := panel_height - 240.0
+	var area_height := panel_height - 300.0
 	var art_height := minf(area_height, 660.0)
 	var art_width := art_height * 2.0 / 3.0
 	reward_slot.size = Vector2(art_width, art_height)
@@ -70,8 +71,8 @@ func set_layout_height(height: float) -> void:
 	reward_aura.position = reward_slot.position - Vector2(20,20)
 	reward_aura.size = reward_slot.size + Vector2(40,40)
 	reward_title.size.x = 460
-	reward_note.position = Vector2(25,panel_height-150)
-	reward_note.size = Vector2(450,70)
+	reward_note.position = Vector2(25,panel_height-210)
+	reward_note.size = Vector2(450,125)
 	reward_next.position = Vector2(80,panel_height-75)
 	reward_next.size = Vector2(340,55)
 	collection_panel.position.y = 35.0 + shift
@@ -203,7 +204,7 @@ func show_reward(card: Dictionary, count: int, milestone: bool) -> void:
 	var strength: float = 0.12 if current_rank == "N" else (0.22 if current_rank == "R" else 0.36)
 	reward_aura.add_theme_stylebox_override("panel", panel_style(Color(color.r, color.g, color.b, strength), Color.TRANSPARENT, 220))
 	for star in stars:
-		star.visible = current_rank in ["SR", "SSR", "SECRET", "COMPLETE"]
+		star.visible = not reduced_motion and current_rank in ["SR", "SSR", "SECRET", "COMPLETE"]
 		star.add_theme_color_override("font_color", color)
 	reveal_duration = {"N": 1.1, "R": 1.35, "SR": 1.7, "SSR": 2.1, "SECRET": 2.5, "COMPLETE": 2.9}.get(current_rank, 1.35)
 	reveal_elapsed = 0.0
@@ -244,6 +245,9 @@ func show_zoom(texture: Texture2D) -> void:
 	zoom_image.texture=texture
 	zoom_button.show()
 
+func show_card_zoom(path: String) -> void:
+	show_zoom(load(path) as Texture2D)
+
 func show_collection(catalog: RefCounted) -> void:
 	zoom_button.hide()
 	for child in collection_grid.get_children():
@@ -262,7 +266,9 @@ func show_collection(catalog: RefCounted) -> void:
 			var image: TextureRect = TextureRect.new()
 			image.position = Vector2(19, 7)
 			image.size = Vector2(100, 150)
-			image.texture = load("res://" + str(card.get("image", ""))) as Texture2D
+			var full_path: String = "res://" + str(card.get("image", ""))
+			var thumb_path: String = full_path.replace("cards/images/", "cards/thumbs/")
+			image.texture = load(thumb_path if ResourceLoader.exists(thumb_path) else full_path) as Texture2D
 			image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			tile.add_child(image)
@@ -272,7 +278,7 @@ func show_collection(catalog: RefCounted) -> void:
 			tap.flat=true
 			tap.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 			tap.tooltip_text=Locale.t("タップで拡大")
-			tap.pressed.connect(show_zoom.bind(image.texture))
+			tap.pressed.connect(show_card_zoom.bind(full_path))
 			tile.add_child(tap)
 		else:
 			var back: Panel = Panel.new()
@@ -304,6 +310,10 @@ func apply_theme(dark: bool) -> void:
 
 func hide_collection() -> void:
 	zoom_button.hide()
+	zoom_image.texture = null
+	for tile in collection_grid.get_children():
+		collection_grid.remove_child(tile)
+		tile.queue_free()
 	collection_panel.visible = false
 	visible = false
 
@@ -311,7 +321,7 @@ func _process(delta: float) -> void:
 	if not visible or not reward_panel.visible :
 		return
 	reveal_elapsed += delta
-	var progress: float = minf(1.0, reveal_elapsed / reveal_duration)
+	var progress: float = 1.0 if reduced_motion else minf(1.0, reveal_elapsed / reveal_duration)
 	var eased: float = 1.0 - pow(1.0 - progress, 3.0)
 	reward_slot.rotation = -TAU * 2.0 * (1.0 - eased)
 	var bounce: float = sin((progress - 0.62) * 30.0) * exp(-(progress - 0.62) * 9.0) * 0.13 if progress > 0.62 and progress < 1.0 else 0.0

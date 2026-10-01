@@ -10,7 +10,7 @@ import json
 root = Path(__file__).resolve().parents[1]
 html = (root / 'browser' / 'START.html').read_text(encoding='utf-8')
 css = (root / 'browser' / 'style.css').read_text(encoding='utf-8')
-css = css.replace('assets/lcd_metal.png', 'data:image/png;base64,' + base64.b64encode((root / 'browser/assets/lcd_metal.png').read_bytes()).decode('ascii'))
+css = css.replace('assets/lcd_metal.webp', 'data:image/webp;base64,' + base64.b64encode((root / 'browser/assets/lcd_metal.webp').read_bytes()).decode('ascii'))
 english = json.loads((root / 'browser' / 'locales' / 'en.json').read_text(encoding='utf-8'))
 (root / 'browser' / 'locale_catalog.js').write_text('window.NAMAKO_EN=' + json.dumps(english, ensure_ascii=False, separators=(',', ':')) + ';\n', encoding='utf-8')
 html = html.replace('<link rel="stylesheet" href="style.css">', '<style>\n' + css + '\n</style>')
@@ -27,9 +27,9 @@ trivia = {
 (root / 'browser' / 'trivia_catalog.js').write_text('window.NAMAKO_TRIVIA_CATALOG=' + json.dumps(trivia, ensure_ascii=False, separators=(',', ':')) + ';\n', encoding='utf-8')
 portrait = root / 'assets' / 'professor_gabo.webp'
 html = html.replace('../assets/professor_gabo.webp', 'data:image/webp;base64,' + base64.b64encode(portrait.read_bytes()).decode('ascii'))
-for name in ('trivia_professor.png', 'trivia_korisuke.png', 'trivia_corinpre.png', 'trivia_professor_en.png', 'trivia_korisuke_en.png', 'trivia_corinpre_en.png'):
+for name in ('trivia_professor.webp', 'trivia_korisuke.webp', 'trivia_corinpre.webp', 'trivia_professor_en.webp', 'trivia_korisuke_en.webp', 'trivia_corinpre_en.webp'):
     asset = root / 'browser' / 'assets' / name
-    html = html.replace('assets/' + name, 'data:image/png;base64,' + base64.b64encode(asset.read_bytes()).decode('ascii'))
+    html = html.replace('assets/' + name, 'data:image/webp;base64,' + base64.b64encode(asset.read_bytes()).decode('ascii'))
 # browser/START.html lives one directory below the project root.
 browser_catalog = copy.deepcopy(catalog)
 for card in browser_catalog.get('cards', []) + [browser_catalog.get('completion_card', {})]:
