@@ -6,6 +6,14 @@ func check(ok: bool, message: String) -> void:
 		failures += 1
 		push_error(message)
 func _initialize() -> void: call_deferred("run")
+func frozen_state(game) -> Dictionary:
+	return {
+		"board": game.model.board.duplicate(), "origin": game.origin,
+		"fall_time": game.fall_time, "phase": game.phase, "phase_time": game.phase_time,
+		"clock": game.clock, "visual_origin": game.board_view.visual_origin,
+		"impact": game.board_view.impact, "vanish_progress": game.board_view.vanish_progress,
+		"vanish_cells": game.board_view.vanish_cells.duplicate(),
+	}
 func run() -> void:
 	Locale.test_language = "en"
 	var game = load("res://Main.tscn").instantiate()
@@ -31,12 +39,41 @@ func run() -> void:
 	check(game.mode == game.Mode.PAUSED, "Back pauses gameplay")
 	game._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
 	check(game.mode == game.Mode.PLAY, "Back returns from pause")
-	var before = game.model.board.duplicate()
+	game.set_process(true)
+	game.fall_time = 0.70
+	var before = frozen_state(game)
 	game.open_settings()
-	game._process(1.0)
-	check(game.model.board == before, "Settings must not advance gameplay")
+	await create_timer(0.85).timeout
+	check(frozen_state(game) == before, "Settings freeze active origin, clocks, phase and visual state across frames")
 	game.close_settings()
 	check(game.mode == game.Mode.PLAY, "Settings preserves mode")
+	await create_timer(0.12).timeout
+	check(game.origin != before.origin, "Falling piece resumes after closing settings")
+	game.hard_drop()
+	var cells: Array[Vector2i] = [Vector2i(0, 1), Vector2i(1, 1)]
+	game.board_view.dissolve(cells, 0)
+	game.board_view.bounce(1, Vector2(20, 20), 0)
+	before = frozen_state(game)
+	game.open_settings()
+	await create_timer(0.85).timeout
+	check(frozen_state(game) == before, "Settings freeze in-progress impact and dissolve tweens")
+	for child in game.board_view.get_children():
+		if child is CPUParticles2D:
+			check(child.speed_scale == 0.0, "Settings freeze existing particles")
+	game.pause_game()
+	game.close_settings()
+	await create_timer(0.15).timeout
+	check(game.mode == game.Mode.PAUSED and game.board_view.frozen, "Closing settings preserves an existing pause")
+	# The main decorative clock intentionally runs in the ordinary pause menu.
+	var paused_state = frozen_state(game)
+	paused_state.erase("clock")
+	before.erase("clock")
+	check(paused_state == before, "Effects stay frozen while gameplay remains paused")
+	game.modal_continue()
+	await create_timer(0.85).timeout
+	check(game.board_view.vanish_cells.is_empty() and is_zero_approx(game.board_view.impact), "Effects finish after gameplay resumes")
+	check(game.phase == 0, "Phase timer resumes after settings and pause")
+	game.set_process(false)
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_size(Vector2i(390,844))
 		game.refresh_layout()

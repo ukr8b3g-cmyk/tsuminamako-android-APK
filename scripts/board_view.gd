@@ -20,7 +20,25 @@ var show_ghost: bool = true
 var show_guide: bool = false
 var guide_origin: Vector2i = Vector2i(-1, -1)
 var clock: float = 0.0
-var frozen: bool = false
+var frozen: bool = false:
+	set(value):
+		if frozen == value:
+			return
+		frozen = value
+		if frozen:
+			for tween in [impact_tween, vanish_tween]:
+				if tween != null and tween.is_valid() and tween.is_running():
+					tween.pause()
+					frozen_tweens.append(tween)
+		else:
+			for tween in frozen_tweens:
+				if tween.is_valid():
+					tween.play()
+			frozen_tweens.clear()
+		for child in get_children():
+			if child is CPUParticles2D:
+				child.speed_scale = 0.0 if frozen else 1.0
+var frozen_tweens: Array[Tween] = []
 var impact_id: int = 0
 var impact: float = 0.0
 var vanish_cells: Array[Vector2i] = []

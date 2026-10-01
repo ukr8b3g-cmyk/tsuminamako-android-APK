@@ -4,6 +4,7 @@
 - Added persistent 0–100% music volume and per-track level balance
 - Added responsive Chromium settings checks for CI
 - Consolidated settings with a paused board, larger touch controls, and reduced motion
+- Freeze native impact/dissolve tweens and existing particles with settings; preserve pause state on close, with multi-frame regression coverage
 - Raised button materials and gray-green LCD; fixed title and collection stacking
 - Restored easy-mode recommendation in the browser LCD renderer
 - Routed Android Back through overlays and pause; released closed collection textures
