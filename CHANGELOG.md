@@ -1,5 +1,7 @@
 # v0.4.9 — Visual polish (development, not released)
 
+- Fixed exported English card artwork selection by checking imported resources rather than raw source files
+- Built and verified the cloud debug APK (60,891,771 bytes); new test signing key, not a same-key upgrade
 - Added approximate remaining-creature count without changing clear thresholds
 - Added persistent 0–100% music volume and per-track level balance
 - Added responsive Chromium settings checks for CI

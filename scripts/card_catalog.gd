@@ -28,7 +28,7 @@ func load_manifest() -> bool:
 	catalog = parsed
 	for card in catalog.get("cards", []) + [catalog.get("completion_card", {})]:
 		card["name"] = Locale.t(str(card.get("name", "")))
-		if not Locale.is_japanese() and card.has("image_en") and FileAccess.file_exists("res://" + str(card["image_en"])):
+		if not Locale.is_japanese() and card.has("image_en") and ResourceLoader.exists("res://" + str(card["image_en"])):
 			card["image"] = card["image_en"]
 	return true
 
