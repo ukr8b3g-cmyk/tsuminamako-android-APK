@@ -252,7 +252,11 @@ html[data-theme="lcd"] #status{background:#bdc6bc;border-radius:10px}
 html[data-theme="lcd"] #stage{background-size:440px 440px;background-blend-mode:multiply;background-color:#89938f}
 html[data-theme="lcd"] #start,html[data-theme="lcd"] #resume-save,html[data-theme="lcd"] #controls>button{background:linear-gradient(#ef6152,#c73c32)!important;border-color:#8d2c28!important;box-shadow:0 5px 0 #8d2c28,0 7px 7px #0004!important}#footer{line-height:20px!important;font-size:13px!important}html[lang="en"] #footer{font-size:12px!important}
 
-#lcd-hardware i{width:17px;height:17px}#lcd-hardware i:after{top:7px;left:3px;width:9px;height:2px}#lcd-hardware i:nth-child(1),#lcd-hardware i:nth-child(3){left:7px}#lcd-hardware i:nth-child(2),#lcd-hardware i:nth-child(4){right:7px}
+#lcd-hardware i{width:17px;height:17px}#lcd-hardware i:after{top:7px;left:3px;width:9px;height:2px}
+#lcd-hardware i:nth-child(1){left:15.5px;top:15.5px}#lcd-hardware i:nth-child(2){right:15.5px;top:15.5px}#lcd-hardware i:nth-child(3){left:15.5px;bottom:15.5px}#lcd-hardware i:nth-child(4){right:15.5px;bottom:15.5px}
+html[data-theme="lcd"] :is(#settings-open,#difficulty,#menu,#lore-button,#cards-button,#demo-speed){top:calc(38px + 4px * var(--layout-t,0))!important;height:calc(54px + 8px * var(--layout-t,0))!important}
+html[data-theme="lcd"] #footer{left:48px!important;width:444px!important}
+#demo-speed{white-space:pre-line;line-height:1.2}
 
 /* Shared compact header: never wrap the game title into AUTO DEMO. */
 h1,h1.demo-title,html[lang="en"] h1,html[lang="en"] h1.demo-title{font-size:27px;line-height:38px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -283,4 +287,3 @@ html[data-reduced="true"] *,html[data-reduced="true"] *:before,html[data-reduced
 button.primary{background-color:#f56848}html[data-theme="light"] #controls>button:not(.primary){background-color:#b9f1eb}#settings-open{font-size:18px}html[data-theme="lcd"] #controls>button{border-radius:40px}
 
 #music-volume{position:absolute;left:236px;top:328px;width:200px;height:74px;accent-color:#218f9f;cursor:pointer}#cards-button{white-space:pre-line;line-height:1.2}
-

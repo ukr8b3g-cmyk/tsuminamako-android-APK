@@ -24,6 +24,12 @@ func run() -> void:
 				game.sync_ui()
 				await process_frame
 				check(game.board_view.lcd_mode==game.lcd_mode,"LCD flags")
+				if game.lcd_mode:
+					check(game.settings_button.position.y >= 37, "top screws clear of header")
+					check(game.settings_button.position.y + game.settings_button.size.y < game.tip_y, "header/tip gap")
+					check(game.ui_footer.position.x > 33 and game.ui_footer.position.x + game.ui_footer.size.x < 507, "bottom screws clear of footer")
+					game.apply_layout_for_size(resolution)
+					check(game.settings_button.position.y >= 37 and game.ui_footer.position.x > 33, "screw clearance survives resize")
 				check(game.ui_count.position.y+game.ui_count.size.y+6<game.board_view.position.y-13,"count/frame gap")
 				check(game.ui_fill.position.y+32<game.board_view.position.y-13,"percent/frame gap")
 				check(game.board_view.position.y+game.board_view.size.y+13<game.ui_status.position.y,"tank/status gap")

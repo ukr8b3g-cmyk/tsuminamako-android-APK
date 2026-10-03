@@ -134,6 +134,7 @@ var lcd_metal: Texture2D = preload("res://assets/lcd_metal.png")
 var theme_button: Button
 var sfx_button: Button
 var speed_button: Button
+var demo_speed_button: Button
 var collection_button: Button
 var menu_button: Button
 var start_button: Button
@@ -294,6 +295,7 @@ func apply_layout_for_size(window_size: Vector2i) -> void:
 	celebration_panel.position.y = 332.0 + (layout_height - 860.0) * 0.5
 	card_ui.set_layout_height(layout_height)
 	trivia_ui.set_layout_height(layout_height)
+	apply_hardware_layout()
 	queue_redraw()
 
 func panel_style(fill: Color, radius: int = 16, border: Color = Color.TRANSPARENT) -> StyleBoxFlat:
@@ -899,7 +901,7 @@ func finish_trivia() -> void:
 	else: begin_play()
 
 func open_collection() -> void:
-	if not cards.rewards_enabled() or mode in [Mode.DEMO, Mode.CELEBRATE, Mode.REVEAL, Mode.TRIVIA]:
+	if not cards.rewards_enabled() or mode in [Mode.CELEBRATE, Mode.REVEAL, Mode.TRIVIA]:
 		return
 	collection_open = true
 	pointer_down = false
@@ -1007,7 +1009,17 @@ func toggle_theme() -> void:
 	sync_ui()
 	queue_redraw()
 
+func apply_hardware_layout() -> void:
+	# Keep screw heads clear of controls and footer at every aspect ratio.
+	if settings_button != null:
+		for button in [settings_button, difficulty_button, menu_button, lore_button, collection_button, demo_speed_button]:
+			button.position.y = 38.0 + 4.0 * layout_t if lcd_mode else 8.0 + 12.0 * layout_t
+			button.size.y = 54.0 + 8.0 * layout_t if lcd_mode else 74.0
+	ui_footer.position.x = 48 if lcd_mode else 18
+	ui_footer.size.x = 444 if lcd_mode else 504
+
 func sync_ui() -> void:
+	apply_hardware_layout()
 	if theme_button != null:
 		theme_button.text = Locale.t("液晶") if lcd_mode else (Locale.t("夜モード") if dark_mode else Locale.t("昼モード"))
 	board_view.dark_mode = dark_mode
@@ -1045,13 +1057,16 @@ func sync_ui() -> void:
 	if music_slider != null: music_slider.set_value_no_signal(sound.music_level * 100)
 	sfx_button.text = "SE " + ("ON" if sound.sfx_enabled else "OFF")
 	speed_button.text = Locale.t("速さ ") + Locale.t(SPEED_LABELS[3 if speed_index == 4 and mode != Mode.DEMO else speed_index])
+	if demo_speed_button != null:
+		demo_speed_button.text = Locale.t("速さ ").strip_edges() + "\n" + Locale.t(SPEED_LABELS[speed_index])
+		demo_speed_button.visible = mode == Mode.DEMO and not collection_open
 	collection_button.text = Locale.t("図鑑") + "\n%d/%d" % [cards.owned_unique_count(), cards.enabled_cards().size()]
-	collection_button.visible = mode != Mode.DEMO and cards.rewards_enabled() and mode != Mode.CELEBRATE and mode != Mode.REVEAL and mode != Mode.TRIVIA and not collection_open
+	collection_button.visible = cards.rewards_enabled() and mode != Mode.CELEBRATE and mode != Mode.REVEAL and mode != Mode.TRIVIA and not collection_open
 	ui_mode.visible = mode == Mode.DEMO
 	ui_title.add_theme_font_size_override("font_size", 27 if Locale.is_japanese() else 22)
 	ui_title.modulate.a = 0.75
 	if lcd_mode:
-		for button in [theme_button,track_button,speed_button,music_button,sfx_button,difficulty_button,menu_button,lore_button,collection_button,settings_button]:
+		for button in [theme_button,track_button,speed_button,music_button,sfx_button,difficulty_button,menu_button,lore_button,collection_button,settings_button,demo_speed_button]:
 			if button != null: set_chip_skin(button,Color("28636c"),Color("184f56"),Color.WHITE)
 		for button in play_buttons + [start_button,resume_button]:
 			set_chip_skin(button,Color("df4d40"),Color("8d2c28"),Color.WHITE)
@@ -1246,13 +1261,16 @@ func draw_lcd_housing() -> void:
 	draw_style_box(panel_style(Color("203b3d"),18,Color("5a7575")),Rect2(board_view.position-Vector2(13,13),board_view.size+Vector2(26,26)))
 	draw_style_box(panel_style(Color("bcc6bd"),12,Color("758a82")),Rect2(20,tip_y,500,tip_h))
 	draw_style_box(panel_style(Color("bdc6bc"),10),Rect2(75,control_y-30,390,24))
-	for point in [Vector2(16,16),Vector2(524,16),Vector2(16,layout_height-16),Vector2(524,layout_height-16)]:
+	for point in [Vector2(24,24),Vector2(516,24),Vector2(24,layout_height-24),Vector2(516,layout_height-24)]:
 		draw_circle(point,8.5,Color("667671"))
 		draw_circle(point-Vector2(0,1),7.5,Color("c7ceca"))
 		draw_line(point-Vector2(4,-2),point+Vector2(4,-2),Color("596965"),2,true)
 
 func build_settings() -> void:
 	settings_button = button_at(Locale.t("設定"), Rect2(20, 8, 94, 42), open_settings)
+	demo_speed_button = button_at("", Rect2(220, 8, 94, 74), cycle_speed)
+	demo_speed_button.add_theme_font_size_override("font_size", 16)
+	demo_speed_button.tooltip_text = Locale.t("速さを切替。デモではマッハも選べます")
 	settings_button.add_theme_font_size_override("font_size", 18)
 	settings_layer = Control.new()
 	settings_layer.z_index = 50
