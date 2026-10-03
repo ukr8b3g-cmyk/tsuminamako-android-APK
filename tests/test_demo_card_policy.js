@@ -18,11 +18,11 @@ function complete(demo){
  app.audio={celebrate(){}};
  app.cards={rewardsEnabled:()=>true,milestoneUnlocked:()=>false,grantForRound(){grants++;return{id:'card-1'};},owned:()=>1};
  app.rewardView={show(){shown++;}};
- app.showTrivia=()=>{trivia++;};app.sync=()=>{};
+ app.showDemoTrivia=()=>{trivia++;app.mode='trivia';};app.nextTank=()=>{app.mode=demo?'demo':'play';};app.sync=()=>{};sandbox.NamakoSession.save=()=>{};
  app.finishCelebration();
  return{grants,shown,trivia,mode:app.mode};
 }
-assert.deepEqual(complete(true),{grants:0,shown:0,trivia:1,mode:'celebrate'});
+assert.deepEqual(complete(true),{grants:0,shown:0,trivia:1,mode:'trivia'});
 assert.deepEqual(complete(false),{grants:1,shown:1,trivia:0,mode:'reveal'});
 const app=Object.create(App.prototype);
 app.mode='demo';app.rewardFromDemo=false;app.collectionOpen=false;app.difficultyIndex=1;app.speedIndex=0;app.phase=0;app.demoClock=0;

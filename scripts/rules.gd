@@ -222,3 +222,36 @@ func verify_invariants() -> bool:
 		if id_value > 0 and not pieces.has(id_value):
 			return false
 	return total == fill_count() and kept == pieces.size() and turns == kept + slipped
+
+func retainable_landing(cells: Array[Vector2i]) -> Dictionary:
+	var shapes: Array = [cells.duplicate()]
+	for i in range(3): shapes.append(rotate(shapes[-1]))
+	for rotated in shapes:
+		for x in range(COLS - width(rotated) + 1):
+			var spot: Vector2i = landing(rotated, Vector2i(x, -TOP_BUFFER))
+			if bool(preview(rotated, spot)["keep"]): return {"cells": rotated, "origin": spot}
+	var start: Vector3i = Vector3i(0, int(floor(float(COLS-width(cells))/2.0)), -TOP_BUFFER)
+	var queue: Array[Vector3i] = [start]
+	var seen: Dictionary = {start: true}
+	var index: int = 0
+	while index < queue.size():
+		var state: Vector3i = queue[index]
+		index += 1
+		var shape_cells: Array[Vector2i] = []
+		shape_cells.assign(shapes[state.x])
+		var spot: Vector2i = Vector2i(state.y, state.z)
+		if not can_place(shape_cells, spot + Vector2i.DOWN) and bool(preview(shape_cells, spot)["keep"]): return {"cells": shape_cells, "origin": spot}
+		var candidates: Array[Vector3i] = []
+		for move in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.DOWN]:
+			if can_place(shape_cells, spot + move): candidates.append(Vector3i(state.x, state.y+move.x, state.z+move.y))
+		for direction in [-1, 1]:
+			var rotation: int = posmod(state.x + direction, 4)
+			for kick in [0, -1, 1, -2, 2, -3, 3]:
+				if can_place(shapes[rotation], spot + Vector2i(kick, 0)):
+					candidates.append(Vector3i(rotation, state.y+kick, state.z))
+					break
+		for candidate in candidates:
+			if not seen.has(candidate):
+				seen[candidate] = true
+				queue.append(candidate)
+	return {}

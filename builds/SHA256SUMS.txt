@@ -1,1 +1,2 @@
 256dc216b98d19052280412f899cd6abccc5ba2d730cb09d357ef50173a25e32  tsuminamako-0.4.9-polish-debug.apk
+c97b8074959dc94084cb0c685c641bdd8e0f70197abb815641fc830695315f2c  tsuminamako-0.4.10-clear-debug.apk

@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>つみなまこ v0.4.9 — ツミナマコ研究手帖</title>
+<title>つみなまこ v0.4.10 — ツミナマコ研究手帖</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="wrap"><main id="stage" aria-label="つみなまこ">
-<div id="lcd-hardware" aria-hidden="true"><i></i><i></i><i></i><i></i><span></span></div><canvas id="canvas" width="540" height="860" aria-label="ナマコを残して水槽を80%埋める落ち物ゲーム"></canvas>
+<div id="lcd-hardware" aria-hidden="true"><i></i><i></i><i></i><i></i><span></span></div><canvas id="canvas" width="540" height="860" aria-label="ナマコを残して水槽を目標まで埋める落ち物ゲーム"></canvas>
 <h1>つみなまこ</h1><button id="settings-open" class="small">設定</button><button id="difficulty" class="small" aria-label="難易度を変更。現在ふつう">ふつう</button><button id="track" class="small" title="BGMの曲を切替">♪ 潮の庭</button>
 <button id="theme" class="small" aria-label="ダークモード切替" aria-pressed="false">夜モード</button>
 <button id="music" class="small" title="BGMのオン／オフ">BGM ON</button>
 <button id="sfx" class="small" title="効果音のオン／オフ">SE ON</button>
 <div id="version">DEEP SEA STACK</div><button id="speed" class="small" title="落下スピードを変更">速さ ×1.0</button><button id="menu" class="small" hidden>Ⅱ ポーズ</button>
 <div id="tip"></div><button id="lore-button" class="small" aria-label="博士のうんちくを読む">うんちく</button><button id="cards-button" class="small" hidden>図鑑 0/20</button><div id="mode">AUTO DEMO</div><div id="count"></div>
-<div id="fill-label">FILL</div><div id="fill">0%</div><div id="target">/ 80%</div><div id="next-label">NEXT</div>
+<div id="fill-label">FILL</div><div id="fill">0%</div><div id="target">/ 90%</div><div id="next-label">NEXT</div>
 <div id="status" role="status" aria-live="polite"></div>
 <div id="celebrate-banner" hidden><div id="celebrate-title">やったね！ 仲間が増えたよ！</div><div id="celebrate-message"></div></div>
 <button id="resume-save" class="primary" hidden>つづきから</button>
@@ -42,14 +42,14 @@
 <div id="reward-sparks" aria-hidden="true"><i>✦</i><i>✦</i><i>✦</i><i>✦</i><i>✦</i><i>✦</i><i>✦</i><i>✦</i></div>
 <div id="reward-flip"><div id="reward-back" class="reward-face" aria-hidden="true">✦<span>NAMAKO</span>✦</div><img id="reward-front" class="reward-face" alt=""></div>
 <div id="reward-note" role="status" aria-live="polite"></div>
-<button id="reward-next" class="primary">博士の話へ ▶</button>
+<button id="reward-next" class="primary">次の水槽へ ▶</button>
 </section>
 <section id="trivia" role="dialog" aria-modal="true" aria-labelledby="trivia-title" hidden>
 <div id="trivia-heading" class="trivia-heading">✦ １面クリア ✦</div>
 <div class="trivia-lab"><button id="trivia-professor-open" class="trivia-professor-open" type="button" aria-label="博士のカードを見る"><img id="trivia-professor" src="../assets/professor_gabo.webp" alt="白髪と丸眼鏡、白衣の博士"></button><div class="trivia-speech">わしは<br>『つみなまこ』研究の<br>博士である。</div><div class="trivia-companions"><button id="trivia-dog-open" class="trivia-companion" type="button" aria-label="犬のコリ助のカードを見る"><img id="trivia-dog-card" src="assets/trivia_korisuke.webp" data-en-src="assets/trivia_korisuke_en.webp" alt="助手の犬コリ助のカード"><span>コリ助</span></button><button id="trivia-dolphin-open" class="trivia-companion" type="button" aria-label="イルカのプレ号のカードを見る"><img id="trivia-dolphin-card" src="assets/trivia_corinpre.webp" data-en-src="assets/trivia_corinpre_en.webp" alt="イルカのプレ号のカード"><span>プレ号</span></button></div><img id="trivia-professor-card" src="assets/trivia_professor.webp" data-en-src="assets/trivia_professor_en.webp" alt="" hidden></div>
 <div class="trivia-name">ガボジョイック・ベヘソナー博士</div>
-<article id="trivia-paper" class="trivia-paper"><div id="trivia-number">研究手帖 001 / 100</div><h2 id="trivia-title"></h2><p id="trivia-body"></p></article>
-<div class="trivia-footnote">ツミナマコは架空の生き物です。</div>
+<article id="trivia-paper" class="trivia-paper"><div id="trivia-number">研究手帖 001 / 200</div><h2 id="trivia-title"></h2><p id="trivia-body"></p></article>
+<div class="trivia-footnote" aria-live="polite">ツミナマコは架空の生き物です。</div>
 <button id="trivia-more" hidden>もう１話</button><button id="trivia-next" class="primary">次の面へ ▶</button>
 <div id="trivia-card-viewer" role="dialog" aria-modal="true" aria-label="博士と仲間のカード" hidden><button id="trivia-card-close" type="button">閉じる ×</button><img id="trivia-card-large" alt=""><div id="trivia-card-caption"></div></div>
 </section>
@@ -62,4 +62,5 @@
 <script src="card_catalog.js"></script><script src="trivia_catalog.js"></script><script src="locale_catalog.js"></script><script src="i18n.js"></script><script src="trivia.js"></script><script src="cards.js"></script><script src="rules.js"></script><script src="rewards.js"></script><script src="session.js"></script><script src="game.js"></script>
 </body>
 </html>
+
 

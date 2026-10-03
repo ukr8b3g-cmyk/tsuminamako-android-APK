@@ -42,8 +42,9 @@ static func read(path: String) -> Dictionary:
 	for key in ["shape", "color"]:
 		if not s["next"].get(key, null) is int or s["next"][key] < 0 or s["next"][key] > 5: return {}
 	if s["phase"] == 0 and not model.is_clear() and not model.can_place(active, s["origin"]): return {}
-	if str(s.get("mode", "")) == "trivia" and (not s.get("trivia_id", null) is int or s["trivia_id"] < 1 or s["trivia_id"] > 100): return {}
+	if str(s.get("mode", "")) == "trivia" and (not s.get("trivia_id", null) is int or s["trivia_id"] < 1 or s["trivia_id"] > 200): return {}
 	if s.has("difficulty") and (not s["difficulty"] is int or s["difficulty"] < 0 or s["difficulty"] > 2): return {}
+	if s.has("target_ratio") and not float(s["target_ratio"]) in [0.7, 0.8, 0.85, 0.9, 0.95]: return {}
 	s["restored_model"] = model
 	return s
 
@@ -53,7 +54,7 @@ static func write(game: Node, path: String) -> void:
 	var data: Dictionary = {"board": model.board, "pieces": model.pieces, "bag": model.bag}
 	for key in ["next_id", "kept", "slipped", "turns", "random_state"]: data[key] = model.get(key)
 	if game.lore_return_mode >= 0: return
-	var state: Dictionary = {"version": 1, "round": game.round_id, "model": data, "active": game.active, "origin": game.origin, "color": game.active_color, "next": game.next_piece, "phase": 1 if game.phase == 1 else 0, "mode": "trivia" if game.mode == game.Mode.TRIVIA else "game", "trivia_id": int(game.trivia_episode.get("id", 0)), "difficulty": game.difficulty_index}
+	var state: Dictionary = {"version": 1, "round": game.round_id, "model": data, "active": game.active, "origin": game.origin, "color": game.active_color, "next": game.next_piece, "phase": 1 if game.phase == 1 else 0, "mode": "trivia" if game.mode == game.Mode.TRIVIA else "game", "trivia_id": int(game.trivia_episode.get("id", 0)), "difficulty": game.difficulty_index, "target_ratio": game.target_ratio()}
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("session", "state", state)
 	if config.save(path) != OK: push_warning("Session could not be saved.")

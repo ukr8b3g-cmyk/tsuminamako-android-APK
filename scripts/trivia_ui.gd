@@ -167,7 +167,7 @@ func show_episode(episode: Dictionary, total: int) -> void:
 		return
 	number_label.text = Locale.t("研究手帖 %03d / %03d") % [int(episode.get("id", 0)), total]
 	title_label.text = str(episode.get("title", ""))
-	body_label.text = str(episode.get("body", ""))
+	body_label.text = str(episode.get("body", "")) + ("\n\n" + Locale.t("ツミナマコは架空の生き物です。このお話は創作です。") if bool(episode.get("fiction", false)) else "")
 	reader_scroll.scroll_vertical = 0
 	visible = true
 

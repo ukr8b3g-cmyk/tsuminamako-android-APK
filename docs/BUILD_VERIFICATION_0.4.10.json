@@ -1,0 +1,37 @@
+{
+  "version": "0.4.10",
+  "sourceBaseCommit": "2c55361d3c615c59791a086840209b35eec63914",
+  "artifact": {
+    "filename": "tsuminamako-0.4.10-clear-debug.apk",
+    "bytes": 60912251,
+    "sha256": "c97b8074959dc94084cb0c685c641bdd8e0f70197abb815641fc830695315f2c",
+    "release": "https://github.com/ukr8b3g-cmyk/tsuminamako-android-APK/releases/tag/v0.4.10"
+  },
+  "signatureCertificateSha256": "85ca0a5b32be7b18fa70de2e8a8b9d7e97c048928f16fa8d3a95018b2b086396",
+  "package": "com.namakotsumi.prototype",
+  "versionCode": 10,
+  "minSdk": 24,
+  "targetSdk": 36,
+  "abi": "arm64-v8a",
+  "verification": [
+    "APK Signature Scheme v2/v3",
+    "ZIP CRC",
+    "zipalign 4-byte and 16KB native alignment",
+    "200 Japanese and 200 English episodes",
+    "21 English card image imports"
+  ],
+  "physicalAndroidTested": false,
+  "runtimeSources": {
+    "scripts/audio.gd": "ce083aafe1e2bb8e7850290c05801943243441b510d1d44a40f1edafe64ec9a0",
+    "scripts/board_view.gd": "577e28719aac9a57b483e7ab47addbd378d561c06db07ca0464172f12a623610",
+    "scripts/card_catalog.gd": "caa6f4b7aab481556aabd31529ef06a17cadcfefe5427cb68c3092bb19a4ee80",
+    "scripts/card_ui.gd": "99d4333d62793a8e6a78e0539f62eb7e2d425a137cb30a33069b1ea72180a73b",
+    "scripts/locale_text.gd": "8ba5b0229a31763b7f663313ba95600bb10e219835431ed08e56f2c314ac248b",
+    "scripts/main.gd": "7023cfa06fc18b6386d85124370fa40127c70de5314fdbcb586c781d0450f17d",
+    "scripts/night_palette.gd": "9bab79a0c7a3213136a15861df781e08847a0f436df9ccfdf97f518f23a269ad",
+    "scripts/rules.gd": "c3d39831bf9144a1d0736cb1dc6a215e2feeae4237c86852ab216d37614ae32b",
+    "scripts/session_store.gd": "7f80ad94c99b75498e626b04b73faa3420821a2bc525f27a44049f3a0c93cbb8",
+    "scripts/trivia_catalog.gd": "efe208215929dd94f505b5fe8d9a882732adadb1971e04e6ed14b9d1fb469cd5",
+    "scripts/trivia_ui.gd": "8e8c67880e4f464214e839a4723b1ab3424b2a278bdac2c99bbdfd126c07b773"
+  }
+}

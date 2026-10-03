@@ -24,13 +24,13 @@ func run_checks() -> void:
 	main.begin_play()
 	main.difficulty_index = 1
 	main.sync_ui()
-	check(main.target_ratio() == 0.8, "normal retains eighty-percent target")
+	check(main.target_ratio() == 0.9, "normal ninety-percent target")
 	main.difficulty_index = 2
 	main.sync_ui()
-	check(main.target_ratio() == 0.9 and not main.board_view.show_ghost and main.speed_multiplier() > 1.0, "hard target, speed and no ghost")
+	check(main.target_ratio() == 0.95 and not main.board_view.show_ghost and main.speed_multiplier() > 1.0, "hard target, speed and no ghost")
 	main.difficulty_index = 0
 	main.sync_ui()
-	check(main.target_ratio() == 0.7 and main.board_view.show_guide, "easy target and landing guide")
+	check(main.target_ratio() == 0.85 and main.board_view.show_guide, "easy target and landing guide")
 	main.difficulty_index = 1
 	main.sync_ui()
 	main.dark_mode = true
@@ -50,8 +50,9 @@ func run_checks() -> void:
 	main.card_ui._process(3.0)
 	check(main.card_ui.reward_front.visible, "front face appears after spin")
 	main.finish_reward()
-	check(main.mode == main.Mode.TRIVIA and main.trivia_ui.visible, "reveal leads to professor notebook")
-	check(main.trivia.episodes.size() == 100 and not main.trivia_episode.is_empty(), "all 100 episodes available")
+	check(main.mode == main.Mode.PLAY and not main.trivia_ui.visible, "reveal goes directly to next tank")
+	main.open_lore()
+	check(main.trivia.episodes.size() == 200 and not main.trivia_episode.is_empty(), "all 200 episodes available")
 	main.finish_trivia()
 	check(main.mode == main.Mode.PLAY, "next stage button begins another round")
 	main.open_collection()

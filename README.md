@@ -2,6 +2,14 @@
 
 Godot 4.7.2 / HTML edition. Japanese OS locale uses Japanese; other locales use English.
 
+## v0.4.10
+
+[Download APK v0.4.10](https://github.com/ukr8b3g-cmyk/tsuminamako-android-APK/releases/download/v0.4.10/tsuminamako-0.4.10-clear-debug.apk). ARM64, Android 7.0+, debug signed with the original local v0.4.8 key. The cloud-built v0.4.9 APK used another key; do not uninstall an existing app just to bypass a signature mismatch, as local saves may be lost.
+
+Targets: Easy 85%, Normal 90%, Hard 95%. An unreachable shape is replaced by one that fits; a tank with no reachable retaining placement is completed without deleting creatures. Final landing (0.5s), board view (1s), then fanfare (0.8s) precede the collectible card and next tank. Gameplay does not automatically show the professor. Demo shows notes without awarding cards and waits 12-40s before restarting. Notes now contain 200 Japanese/English fictional tales; the original 100 are preserved. Settings, volume, reduced motion and optimized artwork from v0.4.9 are retained.
+
+See [verification](docs/BUILD_VERIFICATION_0.4.10.json). Physical Android installation/touch checks remain outstanding. This is a test APK, not a Play Store release.
+
 ## v0.4.9 development source
 
 [Download the complete v0.4.9 APK](builds/tsuminamako-0.4.9-polish-debug.apk?raw=true). The source in this branch matches the runtime-source hashes in [the build verification record](docs/BUILD_VERIFICATION_0.4.9.json).

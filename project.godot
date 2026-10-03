@@ -19,7 +19,7 @@ config/name_localized={
 "en": "Tsumi Namako",
 "ja": "つみなまこ"
 }
-config/version="0.4.9"
+config/version="0.4.10"
 config/icon="res://assets/icon.png"
 run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")

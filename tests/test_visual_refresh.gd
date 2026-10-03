@@ -33,7 +33,7 @@ func run() -> void:
 		check(not game.settings_layer.visible and not game.board_view.frozen, "Demo resumes after settings")
 	game.difficulty_index = 1
 	game.begin_play()
-	check(game.approximate_remaining() == 24, "Normal empty tank estimates 24 namako")
+	check(game.approximate_remaining() == 27, "Normal empty tank estimates 27 namako")
 	check(not quit_on_go_back, "Android back must be routed to game UI")
 	game._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
 	check(game.mode == game.Mode.PAUSED, "Back pauses gameplay")

@@ -62,29 +62,31 @@ func run() -> void:
 		if str(card["id"]) != "card_12": resumed.cards.add_to_collection(card["id"])
 	for rank in resumed.cards.catalog["ranks"]: rank["weight"] = 100 if rank["id"] == "SECRET" else 0
 	resumed.model.reset(123)
-	for i in range(120):
-		if resumed.model.is_clear(): break
-		var spec: Dictionary = resumed.model.next_spec()
-		var plan: Dictionary = resumed.model.demo_choice(resumed.model.shape(spec["shape"]))
-		resumed.model.commit(plan["cells"], plan["origin"], spec["color"])
+	var fixture_id: int = 1
+	for y in range(12):
+		for x in [0, 4]:
+			var cells: Array[Vector2i] = []
+			for offset in range(4):
+				cells.append(Vector2i(x+offset,y))
+				resumed.model.board[y*8+x+offset] = fixture_id
+			resumed.model.pieces[fixture_id] = {"cells":cells,"color":0}
+			fixture_id += 1
+	resumed.model.next_id = fixture_id
+	resumed.model.kept = fixture_id-1
+	resumed.model.turns = fixture_id-1
 	resumed.show_clear()
 	resumed.finish_celebration()
 	check(resumed.cards.total_owned_count() == 20 and resumed.cards.complete(), "twentieth card completes collection")
 	var reloaded: Node = make_game()
 	reloaded.resume_saved()
+	check(reloaded.mode == reloaded.Mode.CELEBRATE, "reload keeps the completion viewing delay")
+	reloaded.finish_celebration()
 	check(reloaded.mode == reloaded.Mode.REVEAL and reloaded.cards.total_owned_count() == 20, "reload after reward does not grant twice")
 	reloaded.finish_reward()
 	check(reloaded.showing_complete and reloaded.card_ui.current_rank == "COMPLETE" and reloaded.card_ui.reward_front.texture != null, "all-together completion card displayed")
 	reloaded.finish_reward()
-	check(reloaded.cards.completion_seen and reloaded.mode == reloaded.Mode.TRIVIA and not Session.read(SAVE).is_empty(), "completion leads to saved professor episode")
-	var episode_id: int = int(reloaded.trivia_episode["id"])
-	var notebook: Node = make_game()
-	notebook.resume_saved()
-	check(notebook.mode == notebook.Mode.TRIVIA and int(notebook.trivia_episode.get("id", 0)) == episode_id, "same episode survives reload")
-	notebook.queue_free()
-	await process_frame
-	reloaded.finish_trivia()
-	check(reloaded.mode == reloaded.Mode.PLAY and reloaded.round_id != str(expected["round"]), "next stage starts a fresh round")
+	check(reloaded.cards.completion_seen and reloaded.mode == reloaded.Mode.PLAY, "completion leads directly to next tank")
+	check(reloaded.round_id != str(expected["round"]), "next stage starts a fresh round")
 	reloaded.open_collection()
 	check(reloaded.card_ui.collection_grid.get_child_count() == 21, "bonus in collection outside twenty slots")
 	var bad: ConfigFile = ConfigFile.new()

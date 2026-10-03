@@ -47,6 +47,8 @@ var vanish_progress: float = 1.0
 var impact_tween: Tween
 var vanish_tween: Tween
 var bubble_texture: ImageTexture
+var goal_ratio: float = 0.9
+var near_goal: bool = false
 var celebration_active: bool = false
 var celebration_clock: float = 0.0
 
@@ -87,9 +89,12 @@ func reset_visuals() -> void:
 	celebration_active = false
 	celebration_clock = 0.0
 
-func start_celebration() -> void:
+func start_celebration(with_burst: bool = true) -> void:
 	celebration_active = true
 	celebration_clock = 0.0
+	if with_burst: celebration_burst()
+
+func celebration_burst() -> void:
 	burst(Vector2(64, 110), Color("ffc44c"), false, true)
 	burst(Vector2(168, 245), Color("ff668b"), false, true)
 	burst(Vector2(272, 130), Color("22c6c5"), false, true)
@@ -187,6 +192,7 @@ func _draw() -> void:
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), Color("1a465a") if dark_mode else Color("d2f0f7"))
 	draw_aquarium()
+	draw_goal_line()
 	for i in range(3):
 		var ray_x: float = 20.0 + float(i) * 115.0 + sin(clock * 0.22 + float(i)) * 16.0
 		draw_colored_polygon(PackedVector2Array([Vector2(ray_x, 0), Vector2(ray_x + 85, size.y), Vector2(ray_x + 135, size.y), Vector2(ray_x + 22, 0)]), Color(0.8, 1, 1, 0.035 if dark_mode else 0.08))
@@ -275,7 +281,7 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 	middle /= float(cells.size())
 	var party_wave: float = 0.0
 	if celebration_active and id_value > 0 and not reduced_motion:
-		party_wave = sin(celebration_clock * 8.0 + float(id_value) * 1.71)
+		party_wave = sin(clampf((celebration_clock-float(id_value % 12)*0.055)/0.65, 0.0, 1.0)*PI)*0.8
 		deformation += party_wave * 0.18
 	if id_value > 0 and not reduced_motion:
 		deformation += sin(clock * 1.9 + float(id_value) * 0.8) * 0.055
@@ -376,3 +382,11 @@ func draw_lcd_board() -> void:
 			draw_circle(center+Vector2(cell)*11,5.5,Color("4b5544"))
 	draw_line(Vector2(0,size.y-2),Vector2(size.x,size.y-2),Color("4b5544"),3)
 	draw_rect(Rect2(1,1,size.x-2,size.y-2),Color("697660"),false,2)
+
+
+func draw_goal_line() -> void:
+	if not near_goal: return
+	var y: float = size.y * (1.0-goal_ratio)
+	var ink: Color = Color("263129") if lcd_mode else Color("ffd36d")
+	ink.a = 0.8 if reduced_motion else 0.55+0.25*sin(clock*2.0)
+	draw_line(Vector2(5,y),Vector2(size.x-5,y),ink,2.5,true)

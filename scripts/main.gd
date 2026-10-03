@@ -23,7 +23,7 @@ const TIPS: Array[String] = [
 const SPEED_VALUES: Array[float] = [1.0, 1.5, 2.0, 3.0, 6.0]
 const SPEED_LABELS: Array[String] = ["×1.0", "×1.5", "×2.0", "×3.0", "マッハ"]
 const DIFFICULTY_NAMES: Array[String] = ["かんたん", "ふつう", "むずかしい"]
-const DIFFICULTY_TARGETS: Array[float] = [0.7, 0.8, 0.9]
+const DIFFICULTY_TARGETS: Array[float] = [0.85, 0.9, 0.95]
 const CELEBRATION_MESSAGES: Array[String] = [
 	"やったね！ 仲間が増えたよ。",
 	"ぎゅうぎゅう。みんなでぬるぬる暮らそう。",
@@ -46,7 +46,7 @@ const CELEBRATION_MESSAGES: Array[String] = [
 	"ここが今日から、みんなのおうち。",
 	"またひとつ、にぎやかになりました。"
 ]
-const CELEBRATION_SECONDS: float = 2.8
+const CELEBRATION_SECONDS: float = 2.3
 enum Mode { DEMO, PLAY, PAUSED, CELEBRATE, REVEAL, CLEAR, TRIVIA }
 const SessionStore = preload("res://scripts/session_store.gd")
 var session_path: String = "user://namako_session.cfg"
@@ -88,6 +88,10 @@ var demo_clock: float = 0.0
 var demo_wait: float = 0.0
 var demo_target: int = 0
 var status_time: float = 0.0
+var round_target: float = 0.0
+var clear_packed: bool = false
+var celebration_stage: int = 0
+var milestone_new: bool = false
 var celebration_time: float = 0.0
 var celebration_message: String = ""
 var pointer_down: bool = false
@@ -432,7 +436,7 @@ func build_ui() -> void:
 	celebration_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	celebration_panel.add_theme_stylebox_override("panel", panel_style(Color(1.0, 0.98, 0.91, 0.94), 27, Color("f1c96e")))
 	add_child(celebration_panel)
-	celebration_title = label_at(Locale.t("やったね！ 仲間が増えたよ！"), Vector2(20, 20), Vector2(396, 48), 27, Color("b66d43"), celebration_panel)
+	celebration_title = label_at(Locale.t("やったね！ 水槽完成！"), Vector2(20, 20), Vector2(396, 48), 27, Color("b66d43"), celebration_panel)
 	celebration_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	celebration_title.add_theme_font_override("font", heavy_font)
 	celebration_note = label_at("", Vector2(20, 72), Vector2(396, 58), 17, Color("476b68"), celebration_panel)
@@ -458,6 +462,9 @@ func build_ui() -> void:
 	sync_ui()
 
 func reset_round(seed_value: int) -> void:
+	round_target = 0.0
+	clear_packed = false
+	celebration_stage = 0
 	model.reset(seed_value)
 	board_view.reset_visuals()
 	phase = 0
@@ -508,6 +515,7 @@ func resume_saved() -> void:
 		return
 	reset_round(1)
 	round_id = saved["round"]
+	round_target = float(saved.get("target_ratio", 0.0))
 	model = saved["restored_model"]
 	board_view.model = model
 	active.assign(saved["active"])
@@ -533,9 +541,10 @@ func resume_saved() -> void:
 	board_view.show_ghost = difficulty_index != 2
 	if goal_reached():
 		show_clear()
-		finish_celebration()
 	else:
 		if phase == 1: spawn_piece()
+		else: ensure_playable_tank()
+		if mode == Mode.CELEBRATE: return
 		pause_game()
 	sync_ui()
 
@@ -550,6 +559,7 @@ func spawn_piece() -> void:
 	origin = Vector2i(int(floor(float(Rules.COLS - model.width(active)) / 2.0)), -Rules.TOP_BUFFER)
 	phase = 0
 	fall_time = 0.0
+	if not ensure_playable_tank(): return
 	if mode == Mode.DEMO:
 		var plan: Dictionary = model.demo_choice(active, model.turns > 2 and model.turns % 5 == 3)
 		if not plan.is_empty():
@@ -572,6 +582,8 @@ func spawn_piece() -> void:
 	SessionStore.write(self, session_path)
 
 func _process(raw_delta: float) -> void:
+	board_view.goal_ratio = target_ratio()
+	board_view.near_goal = mode in [Mode.PLAY, Mode.DEMO] and target_ratio()-model.fill_ratio() > 0.0 and target_ratio()-model.fill_ratio() <= 0.05
 	if settings_open:
 		return
 	var delta: float = minf(raw_delta, 0.05)
@@ -583,7 +595,7 @@ func _process(raw_delta: float) -> void:
 	if mode == Mode.DEMO:
 		demo_clock += delta
 		ui_tip.text = Locale.t(TIPS[int(floor(demo_clock / 5.2)) % TIPS.size()]).replace("80%", "%d%%" % int(round(target_ratio() * 100.0)))
-	if reward_from_demo and mode in [Mode.REVEAL, Mode.TRIVIA]:
+	if reward_from_demo and lore_return_mode < 0 and mode == Mode.TRIVIA and trivia_ui.art_viewer == null:
 		demo_overlay_time -= delta
 		if demo_overlay_time <= 0.0:
 			if mode == Mode.REVEAL: finish_reward()
@@ -592,9 +604,7 @@ func _process(raw_delta: float) -> void:
 		queue_redraw()
 		return
 	if mode == Mode.CELEBRATE:
-		celebration_time = maxf(0.0, celebration_time - delta)
-		if celebration_time <= 0.0:
-			finish_celebration()
+		update_celebration(delta)
 		queue_redraw()
 		return
 	if status_time > 0.0:
@@ -708,6 +718,9 @@ func lock_piece() -> void:
 		board_view.dissolve(absolute, active_color)
 		sound.play("slip", mode == Mode.DEMO)
 		set_status(Locale.t("上はいっぱい。横にずらしてみよう。") if str(result["reason"]) == "overflow" else Locale.t("ぬるっ…　大丈夫、次を置こう。"), 1.35)
+	if bool(result["keep"]) and goal_reached():
+		show_clear(mode == Mode.DEMO)
+		return
 	sync_ui()
 	SessionStore.write(self, session_path)
 
@@ -750,37 +763,76 @@ func modal_continue() -> void:
 		sound.play("click")
 		sync_ui()
 
-func show_clear(from_demo: bool = false) -> void:
+func ensure_playable_tank() -> bool:
+	if not model.retainable_landing(active).is_empty(): return true
+	var available: Array[bool] = []
+	for i in range(Rules.SHAPES.size()): available.append(not model.retainable_landing(model.shape(i)).is_empty())
+	if not available.has(true):
+		show_clear(mode == Mode.DEMO, true)
+		return false
+	for i in range(12):
+		var spec: Dictionary = next_piece
+		next_piece = model.next_spec()
+		if available[int(spec["shape"])]:
+			active = model.shape(int(spec["shape"]))
+			active_color = int(spec["color"])
+			origin = Vector2i(int(floor(float(Rules.COLS-model.width(active))/2.0)), -Rules.TOP_BUFFER)
+			set_status(Locale.t("この形は入らないので、入る仲間に交代！"), 2.0)
+			return true
+	return false
+
+func show_clear(from_demo: bool = false, packed: bool = false) -> void:
+	if mode in [Mode.CELEBRATE, Mode.REVEAL]: return
+	round_target = target_ratio()
+	clear_packed = packed
 	reward_from_demo = from_demo
-	if from_demo: round_id = "demo-" + str(Time.get_ticks_usec()) + "-" + str(randi())
 	mode = Mode.CELEBRATE
+	phase = 1
 	board_view.show_active = false
 	celebration_time = CELEBRATION_SECONDS
-	celebration_message = Locale.t(CELEBRATION_MESSAGES[randi_range(0, CELEBRATION_MESSAGES.size() - 1)])
-	board_view.start_celebration()
+	celebration_stage = 0
+	celebration_message = Locale.t("どの仲間も入らないので、この水槽は完成！") if packed else Locale.t(CELEBRATION_MESSAGES[randi_range(0, CELEBRATION_MESSAGES.size()-1)])
+	milestone_new = false
+	if not from_demo and cards.rewards_enabled():
+		var before: bool = cards.milestone_unlocked()
+		last_reward = cards.grant_for_round(round_id, reward_rng)
+		milestone_new = not before and cards.milestone_unlocked()
 	sound.set_celebration(true)
-	sound.play("clear")
-	sound.play("fanfare", from_demo)
-	set_status(Locale.t("パンパカパーン！　みんなでくねくね。"), CELEBRATION_SECONDS)
+	set_status(Locale.t("ぴたっ！ 最後の仲間が着地。"), CELEBRATION_SECONDS)
 	sync_ui()
 	SessionStore.write(self, session_path)
 
+func update_celebration(delta: float) -> void:
+	celebration_time = maxf(0.0, celebration_time-delta)
+	var elapsed: float = CELEBRATION_SECONDS-celebration_time
+	var stage: int = 0 if elapsed < 0.5 else (1 if elapsed < 1.5 else 2)
+	if stage != celebration_stage:
+		celebration_stage = stage
+		if stage == 1:
+			board_view.start_celebration(false)
+			set_status(Locale.t("ぎゅっと集合。完成した水槽を眺めよう。"), 1.0)
+		else:
+			board_view.celebration_burst()
+			sound.play("clear", reward_from_demo)
+			sound.play("fanfare", reward_from_demo)
+			set_status(Locale.t("やったね！ 水槽完成！"), 0.8)
+		sync_ui()
+	if celebration_time <= 0.0: finish_celebration()
+
 func finish_celebration() -> void:
-	if mode != Mode.CELEBRATE:
-		return
+	if mode != Mode.CELEBRATE: return
 	board_view.stop_celebration()
 	sound.set_celebration(false)
-	if not reward_from_demo and cards.rewards_enabled():
-		var was_unlocked: bool = cards.milestone_unlocked()
-		var reward: Dictionary = cards.grant_for_round(round_id, reward_rng)
-		if not reward.is_empty():
-			last_reward = reward.duplicate(true)
-			mode = Mode.REVEAL
-			demo_overlay_time = 6.5 if reward_from_demo else 0.0
-			card_ui.show_reward(reward, cards.owned_count(str(reward.get("id", ""))), not was_unlocked and cards.milestone_unlocked())
-			sync_ui()
-			return
-	show_trivia()
+	if not reward_from_demo and not last_reward.is_empty():
+		mode = Mode.REVEAL
+		card_ui.show_reward(last_reward, cards.owned_count(str(last_reward["id"])), milestone_new)
+		sync_ui()
+	elif reward_from_demo: show_trivia()
+	else: next_tank()
+
+func next_tank() -> void:
+	SessionStore.clear(session_path)
+	begin_play()
 
 func on_reveal_peak(rank: String) -> void:
 	sound.play("card_rare" if rank in ["SR", "SSR", "SECRET", "COMPLETE"] else "card_pop")
@@ -799,7 +851,7 @@ func finish_reward() -> void:
 		cards.save_collection()
 		showing_complete = false
 	card_ui.hide_reward()
-	show_trivia()
+	next_tank()
 
 func open_lore() -> void:
 	if collection_open or mode not in [Mode.DEMO, Mode.PLAY, Mode.PAUSED]: return
@@ -815,9 +867,13 @@ func show_trivia() -> void:
 		finish_trivia()
 		return
 	mode = Mode.TRIVIA
-	demo_overlay_time = 18.0 if reward_from_demo else 0.0
+	var body: String = str(trivia_episode.get("body", ""))
+	demo_overlay_time = clampf(body.length()/7.0 if Locale.is_japanese() else body.split(" ").size()/3.0, 12.0, 40.0) if reward_from_demo else 0.0
 	trivia_ui.show_episode(trivia_episode, trivia.episodes.size())
 	trivia_ui.set_reader_mode(lore_return_mode >= 0)
+	if reward_from_demo and lore_return_mode < 0:
+		trivia_ui.next_button.text = Locale.t("デモを続ける ▶")
+		trivia_ui.heading_label.text = Locale.t("✦ 博士のうんちく ✦")
 	sync_ui()
 	if lore_return_mode < 0: SessionStore.write(self, session_path)
 
@@ -869,7 +925,7 @@ func approximate_remaining() -> int:
 	return int(ceil(float(cells_needed) / (float(shape_cells) / Rules.SHAPES.size())))
 
 func target_ratio() -> float:
-	return DIFFICULTY_TARGETS[difficulty_index]
+	return round_target if round_target > 0.0 else DIFFICULTY_TARGETS[difficulty_index]
 
 func goal_reached() -> bool:
 	return model.fill_ratio() >= target_ratio()
@@ -917,6 +973,8 @@ func cycle_speed() -> void:
 	sync_ui()
 
 func cycle_difficulty() -> void:
+	if mode in [Mode.CELEBRATE, Mode.REVEAL, Mode.TRIVIA]: return
+	round_target = 0.0
 	difficulty_index = (difficulty_index + 1) % 3
 	save_speed_setting()
 	sound.play("click")
@@ -1014,13 +1072,14 @@ func sync_ui() -> void:
 		button.visible = mode == Mode.PLAY
 		button.disabled = phase != 0
 	if mode == Mode.CELEBRATE:
-		ui_tip.text = Locale.t("やったね！ 仲間が増えたよ！")
+		ui_tip.text = Locale.t("やったね！ 水槽完成！")
 	elif mode != Mode.DEMO:
 		ui_tip.text = Locale.t("床なら残る。床より上は別のナマコ２匹に触れれば残る。\n１匹以下なら、ぬるっと消える。")
 	else:
 		ui_tip.text = Locale.t(TIPS[int(floor(demo_clock / 5.2)) % TIPS.size()]).replace("80%", "%d%%" % int(round(target_ratio() * 100.0)))
 	ui_footer.text = Locale.t("自動デモ中  ·  ルールを見たらスタート  ·  速さボタンで変更") if mode == Mode.DEMO else (Locale.t("お祝い中…　このあとカードをゲット！") if mode == Mode.CELEBRATE else Locale.t("← → 移動   Z / X 回転   Space 落下   Esc メニュー   R やり直す"))
-	celebration_panel.visible = mode == Mode.CELEBRATE
+	celebration_panel.visible = mode == Mode.CELEBRATE and celebration_stage == 2
+	celebration_title.text = Locale.t("ぎゅうぎゅう！ 水槽満員！") if clear_packed else Locale.t("やったね！ 水槽完成！")
 	celebration_note.text = celebration_message
 	modal.visible = (mode == Mode.PAUSED or mode == Mode.CLEAR) and not collection_open
 	modal_shade.visible = modal.visible
@@ -1254,3 +1313,4 @@ func toggle_motion() -> void:
 	config.set_value("appearance", "reduced_motion", reduced_motion)
 	config.save("user://namako_settings.cfg")
 	sync_ui()
+

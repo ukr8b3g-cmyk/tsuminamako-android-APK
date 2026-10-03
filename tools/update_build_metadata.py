@@ -35,7 +35,7 @@ artifacts = [ROOT/'START.html'] + sorted((ROOT/'builds').glob('*.apk')) + sorted
 artifacts = [p for p in artifacts if p.is_file()] if args.artifacts else []
 manifest = {
     'version': version,
-    'sourceBaseline': '099b6c8ce80e05411f9840c0ebb1f5eb375a2d88',
+    'sourceBaseline': '2c55361d3c615c59791a086840209b35eec63914',
     'hashAlgorithm': 'SHA-256',
     'files': files,
     'artifacts': {str(p.relative_to(ROOT)).replace('\\','/'): {'bytes': p.stat().st_size, 'sha256': sha(p)} for p in artifacts},

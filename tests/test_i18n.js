@@ -4,9 +4,9 @@ const root=path.join(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const ja=JSON.parse(read('browser/lore_100_v2_1.json'));
 const en=JSON.parse(read('browser/locales/en.json'));
-assert.equal(en.lore.entries.length,100);
+assert.equal(en.lore.entries.length,200);
 assert.deepEqual(en.lore.entries.map(x=>x.id),ja.entries.map(x=>x.id));
-assert.equal(new Set(en.lore.entries.map(x=>x.title)).size,100);
+assert.equal(new Set(en.lore.entries.map(x=>x.title)).size,200);
 for(const entry of en.lore.entries)assert(!/[ぁ-んァ-ヶ一-龯]/u.test(JSON.stringify(entry)));
 for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-FR',''],['de',''],['zh-CN',''],['',''],['en-US','ja-JP'],['ja-JP','en-US']]){
  const document={documentElement:{},body:{},title:'つみなまこ',createTreeWalker:()=>({nextNode:()=>null}),querySelectorAll:()=>[]};
@@ -34,7 +34,7 @@ for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-
   assert.equal(local.missing.size,0);
   const elements=new Map();
   document.getElementById=id=>{if(!elements.has(id))elements.set(id,{hidden:id==='trivia-card-viewer',style:{},textContent:'',attrs:{},setAttribute(k,v){this.attrs[k]=v;},removeAttribute(k){delete this[k];},classList:{toggle(){}}});return elements.get(id);};
-  sandbox.NamakoSession={read:()=>null};
+  document.querySelector=s=>document.getElementById(s);sandbox.NamakoSession={read:()=>null};
   const game=read('browser/game.js');
   vm.runInContext(game.slice(0,game.indexOf('const game=new NamakoApp();'))+'\nglobalThis.TestApp=NamakoApp;',sandbox);
   const app=Object.create(sandbox.TestApp.prototype);
@@ -51,4 +51,4 @@ const standalone=read('START.html');
 assert(standalone.includes('window.NAMAKO_EN='));
 assert.equal((standalone.match(/data-en-src="data:image\/webp;base64,/g)||[]).length,3);
 assert(!standalone.includes('<script src='));
-console.log('PASS: primary locale ja => Japanese; all others => English; 100 stories, UI literal/HTML coverage, 3 embedded English character images.');
+console.log('PASS: primary locale ja => Japanese; all others => English; 200 stories, UI literal/HTML coverage, 3 embedded English character images.');

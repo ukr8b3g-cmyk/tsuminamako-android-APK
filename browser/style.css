@@ -45,6 +45,7 @@ html[data-theme="dark"] #difficulty{background:#5a4639;color:#ffe7ba;border-colo
 #celebrate-banner{position:absolute;left:48px;top:332px;width:444px;min-height:146px;padding:19px 22px 17px;border-radius:27px;background:#fffaf0e8;border:2px solid #f1c96e;box-shadow:0 12px 34px #385d5132;text-align:center;pointer-events:none;animation:celebrate-pop .48s cubic-bezier(.2,1.5,.4,1)}
 #celebrate-title{font-size:27px;line-height:1.25;font-weight:800;color:#b66d43;letter-spacing:.5px}
 #celebrate-message{margin-top:10px;font-size:17px;line-height:1.55;color:#476b68;white-space:pre-line}
+@media (prefers-reduced-motion:reduce){#celebrate-banner{animation:none}}
 @keyframes celebrate-pop{0%{transform:scale(.72) rotate(-2deg);opacity:0}65%{transform:scale(1.05) rotate(1deg);opacity:1}100%{transform:scale(1);opacity:1}}
 
 #reward{position:absolute;left:35px;top:50px;width:470px;height:750px;border:2px solid var(--accent,#a9b6b2);border-radius:26px;background:#f9fcf8;box-shadow:0 18px 50px #112c38a0;text-align:center;overflow:hidden;perspective:900px}
@@ -282,3 +283,4 @@ html[data-reduced="true"] *,html[data-reduced="true"] *:before,html[data-reduced
 button.primary{background-color:#f56848}html[data-theme="light"] #controls>button:not(.primary){background-color:#b9f1eb}#settings-open{font-size:18px}html[data-theme="lcd"] #controls>button{border-radius:40px}
 
 #music-volume{position:absolute;left:236px;top:328px;width:200px;height:74px;accent-color:#218f9f;cursor:pointer}#cards-button{white-space:pre-line;line-height:1.2}
+

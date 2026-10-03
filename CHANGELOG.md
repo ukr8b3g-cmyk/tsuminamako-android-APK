@@ -1,3 +1,13 @@
+# v0.4.10 — 2026-10-03
+
+- Preserve current main v0.4.9 UI, settings, music level, Back handling and optimized art.
+- Add reachable-placement rescue, replacement shapes and packed-tank completion.
+- Set difficulty targets to 85/90/95%; add 2.3-second landing/view/celebration sequence.
+- Save each reward once per round; collectible card proceeds directly to the next tank.
+- Demo awards no cards; show random notebook entries with a reading delay and a Continue Demo button.
+- Add 100 bilingual fictional tales, for 200 total, and persisted shuffle history.
+- Build and verify ARM64 debug APK with the original local signing key.
+
 # v0.4.9 — Visual polish (development, not released)
 
 - Fixed exported English card artwork selection by checking imported resources rather than raw source files

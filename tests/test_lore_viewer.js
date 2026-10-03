@@ -14,7 +14,7 @@ function element(id){
 }
 const saves=[];let clears=0;
 const session={read:()=>null,save:g=>saves.push(g.mode),clear:()=>{clears++;}};
-const sandbox={window:{},document:{getElementById:element},NamakoSession:session};
+const sandbox={window:{},document:{getElementById:element,querySelector:element},NamakoSession:session};
 vm.runInNewContext(gameSource.slice(0,end)+'\nglobalThis.TestApp=NamakoApp;',sandbox);
 const episodes=[{id:1,title:'最初の話',body:'最初の本文'},{id:2,title:'次の話',body:'次の本文'}];
 function make(mode){
