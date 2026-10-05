@@ -26,7 +26,7 @@ function prepare(g){
  try{
  for(const lang of ['ja','en'])for(const theme of ['light','dark','lcd'])for(const size of [[360,640],[390,844]]){
   const context=await browser.newContext({viewport:{width:size[0],height:size[1]},locale:lang,deviceScaleFactor:2});
-  await context.addInitScript(()=>{window.NAMAKO_TEST_MODE=true;window.requestAnimationFrame=()=>0;});
+  await context.addInitScript(lang=>{window.NAMAKO_TEST_MODE=true;window.NAMAKO_TEST_LANGUAGE=lang;window.requestAnimationFrame=()=>0;},lang);
   const page=await context.newPage(),errors=[],warnings=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='warning'&&m.text().includes('Missing English'))warnings.push(m.text());});
   await page.goto(pathToFileURL(path.join(root,'START.html')).href+'?test=1');await page.waitForFunction(()=>window.__namako);
   await page.evaluate(({theme,prepare})=>{localStorage.clear();localStorage.setItem('namako_theme',theme);const g=__namako;g.cards.collection={};g.cards.lastGrant={};g.dark=theme==='dark';g.lcd=theme==='lcd';g.applyTheme();window.played=[];g.audio.play=(n,demo)=>played.push({n,demo});g.audio.musicEnabled=false;(new Function('g','('+prepare+')(g)'))(g);}, {theme,prepare:prepare.toString()});

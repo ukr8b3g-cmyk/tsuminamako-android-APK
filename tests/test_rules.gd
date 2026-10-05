@@ -29,7 +29,7 @@ func run_tests() -> void:
 	r.reset()
 	drop(r, r.shape(0), 0, 2)
 	drop(r, r.shape(0), 2, 2)
-	out = drop(r, r.shape(0), 1, 2)
+	out = drop(r, r.shape(0), 1, 3)
 	check(bool(out["keep"]) and out["contacts"].size() == 2 and r.fill_count() == 6, "TWO different neighbours retain a bridge; colour ignored")
 	var before: PackedInt32Array = r.board.duplicate()
 	out = r.preview(r.shape(0), Vector2i(5, 4))
@@ -52,25 +52,25 @@ func run_tests() -> void:
 	check(r.fill_count() == 2 and r.slipped == 299 and r.verify_invariants(), "300 straight drops do not create a tower")
 	r.reset()
 	for x in range(0, Rules.COLS, 2):
-		drop(r, r.shape(0), x)
-	check(r.fill_count() == 8 and r.pieces.size() == 4, "full row remains without hardening")
+		drop(r, r.shape(0), x, x / 2)
+	check(r.fill_count() == 8 and r.pieces.size() == 4, "mixed-colour full row remains occupied")
 	var cleared: int = 0
 	for seed_value in range(1, 21):
 		r.reset(seed_value)
 		for _turn in range(100):
-			var spec: Dictionary = r.next_spec()
-			var choice: Dictionary = r.demo_choice(r.shape(int(spec["shape"])))
+			var spec: Dictionary = r.next_spec(0)
+			var choice: Dictionary = r.demo_choice(r.shape(int(spec["shape"])), false, int(spec["color"]))
 			if choice.is_empty():
 				break
 			var cells: Array[Vector2i] = []
 			cells.assign(choice["cells"])
 			var position: Vector2i = choice["origin"]
 			r.commit(cells, position, int(spec["color"]))
-			if r.is_clear():
+			if r.fill_ratio() >= 0.7:
 				cleared += 1
 				break
 		check(r.verify_invariants(), "planned run invariants seed %d" % seed_value)
-	check(cleared == 20, "20 seeded planned games clear")
+	check(cleared == 20, "20 seeded Easy games reach the 70% goal")
 	check_reference_fixtures()
 	print("Native rule tests: %d PASS / %d FAIL" % [passed, failed])
 	var report: Dictionary = {"engine": Engine.get_version_info(), "passed": passed, "failed": failed, "scope": "native rule suite, not visual or audio-device testing"}

@@ -23,7 +23,7 @@ function make(mode){
  app.trivia={episodes,pick:()=>episodes[index++%episodes.length]};
  app.cards={rewardsEnabled:()=>true,milestoneUnlocked:()=>false,ownedUnique:()=>0,enabledCards:()=>[{id:'card-1'}]};
  app.audio={trackLabel:()=>'潮の庭',musicEnabled:true,sfxEnabled:true,play(){}};
- app.model={fillRatio:()=>0,fillCount:()=>0,kept:0};
+ app.model={fillRatio:()=>0,fillCount:()=>0,kept:0,pieces:new Map()};app.entryRoute=[];
  app.collectionOpen=false;app.difficultyIndex=1;app.speedIndex=0;app.phase=0;app.demoClock=0;app.celebrationMessage='';
  return app;
 }

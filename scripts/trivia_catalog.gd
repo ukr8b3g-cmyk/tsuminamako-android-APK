@@ -10,10 +10,7 @@ var last_id: int = 0
 var remaining: Array[int] = []
 
 func _init() -> void:
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH if Locale.is_japanese() else "res://data/namako_episodes_100_en.json"))
-	if parsed is Dictionary:
-		episodes = parsed.get("episodes", [])
-		sources = parsed.get("sources", {})
+	reload_language()
 	var history: ConfigFile = ConfigFile.new()
 	if history.load(HISTORY_PATH) == OK:
 		last_id = int(history.get_value("history", "last_id", 0))
@@ -21,6 +18,12 @@ func _init() -> void:
 		if ids is Array:
 			for id in ids:
 				if id is int and not by_id(id).is_empty() and not remaining.has(id): remaining.append(id)
+
+func reload_language() -> void:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH if Locale.is_japanese() else "res://data/namako_episodes_100_en.json"))
+	if parsed is Dictionary:
+		episodes = parsed.get("episodes", [])
+		sources = parsed.get("sources", {})
 
 func by_id(id: int) -> Dictionary:
 	for raw in episodes:

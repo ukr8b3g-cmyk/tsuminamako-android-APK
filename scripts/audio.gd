@@ -3,7 +3,7 @@ const Locale = preload("res://scripts/locale_text.gd")
 ## Native Godot audio only. All WAVs are newly synthesized for this prototype.
 ## Separate Music/SFX buses; no microphone, networking, or third-party plugins.
 
-const SFX_NAMES: Array[String] = ["move", "rotate", "drop", "stick", "slip", "click", "start", "clear", "fanfare", "card_pop", "card_rare"]
+const SFX_NAMES: Array[String] = ["move", "rotate", "drop", "stick", "slip", "click", "start", "clear", "fanfare", "card_pop", "card_rare", "merge"]
 const TRACKS: Array[String] = ["tide_garden", "bubble_parade", "moon_pool", "aquarium_air", "drowse"]
 # Measured PCM RMS trims; keep the five existing tracks at a similar level.
 const TRACK_TRIMS_DB: Array[float] = [0.6, -1.0, -0.4, 2.7, 1.1]

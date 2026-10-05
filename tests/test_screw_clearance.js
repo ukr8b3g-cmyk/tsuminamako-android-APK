@@ -11,7 +11,7 @@ const {chromium} = require('playwright');
         const page = await browser.newPage({viewport: {width,height}});
         await page.route('https://namako.test/**', route => route.fulfill({contentType:'text/html',body:
           fs.readFileSync(path.join(__dirname,'../START.html'),'utf8').replace('<head>',
-            `<head><script>window.NAMAKO_OS_LOCALE='${language}';window.NAMAKO_TEST_MODE=true;</script>`)}));
+            `<head><script>window.NAMAKO_TEST_LANGUAGE='${language}';window.NAMAKO_TEST_MODE=true;</script>`)}));
         await page.goto('https://namako.test');
         await page.waitForFunction(() => window.__namako);
         await page.evaluate(() => {

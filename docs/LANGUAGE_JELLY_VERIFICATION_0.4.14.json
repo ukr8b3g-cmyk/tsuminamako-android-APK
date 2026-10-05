@@ -1,0 +1,190 @@
+{
+  "version": "0.4.14",
+  "scope": "Local HTML and Godot implementation with a local debug APK; no commit or remote publication",
+  "createdAt": "2026-10-05T18:24:57.344451+09:00",
+  "canonicalRuntime": "D:\\Godot_v4.7.2-stable_win64.exe\\NamakoTsumi_v0.4",
+  "snapshot": "D:\\Codex\\_snapshots\\NamakoTsumi\\20261005_175541_language_jelly",
+  "language": {
+    "firstLaunch": "ja independent of OS locale",
+    "savedPreference": true,
+    "button": "settings header",
+    "switchWithoutReset": [
+      "board",
+      "active piece",
+      "next piece",
+      "round ID",
+      "collection",
+      "reading cycle"
+    ],
+    "translationCoverage": [
+      "UI",
+      "status",
+      "card names and images",
+      "companion images",
+      "200 notebook stories"
+    ]
+  },
+  "jelly": {
+    "joinSeconds": [
+      0,
+      0.18
+    ],
+    "fuseSeconds": [
+      0.18,
+      0.32
+    ],
+    "bubbleStartSeconds": 0.45,
+    "fadeSeconds": [
+      0.52,
+      0.9
+    ],
+    "reducedMotionSeconds": 0.35,
+    "sameColourRuleUnchanged": true,
+    "topologyCached": true
+  },
+  "tests": {
+    "browserLanguageJelly": {
+      "passedCases": 6,
+      "themes": [
+        "light",
+        "dark",
+        "lcd"
+      ],
+      "viewports": [
+        [
+          320,
+          568
+        ],
+        [
+          412,
+          915
+        ]
+      ],
+      "englishOSDefaultsToJapanese": true,
+      "actualButtonAndReload": true,
+      "opaqueFusedStage": true,
+      "pausedSwitchAndResume": true,
+      "reducedMotion": true,
+      "pageErrors": 0
+    },
+    "nativeLanguageJellyWindowsGPU": {
+      "passedThemes": 3,
+      "failures": 0,
+      "headerResolutions": [
+        [
+          320,
+          568
+        ],
+        [
+          412,
+          915
+        ],
+        [
+          1440,
+          3200
+        ]
+      ],
+      "actualButton": true,
+      "companionImageChangesAfterSwitch": true,
+      "renderedStageImages": 9,
+      "viewedImages": [
+        "jelly_native_1_fused.png",
+        "language_settings_en.png",
+        "browser join/fused/bubble images"
+      ]
+    },
+    "browserI18n": "PASS: 10 OS locale conditions default to Japanese; explicit English coverage and 200 stories",
+    "nativeI18n": "PASS: 8 test locale overrides; Japanese first launch and 200 stories",
+    "browserSameColour": {
+      "passedCases": 12
+    },
+    "browserTopEntryEasy": {
+      "passedCases": 6
+    },
+    "browserClearTales": {
+      "passedCases": 12
+    },
+    "nativeSameColour": {
+      "passedCases": 6,
+      "failures": 0
+    },
+    "browserRules": {
+      "passed": 22,
+      "randomInvariantChecks": 10000,
+      "easyPlannedClears": "100/100 at 70%"
+    },
+    "cardAndTriviaData": "PASS",
+    "bilingualCardArt": "PASS: 21 artworks, Japanese OS-independent default, EN/JA switches",
+    "legacyAdditionalTest": {
+      "test": "tests/test_demo_card_policy.js",
+      "result": "not a passing gate",
+      "reason": "Existing standalone mock lacks entryRoute introduced before this change. Runtime behavior and user-requested demo collection access are covered by browser integration tests. This obsolete test was not altered."
+    }
+  },
+  "apk": {
+    "versionCode": 14,
+    "versionName": "0.4.14",
+    "package": "com.namakotsumi.prototype",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "architecture": "arm64-v8a",
+    "signerCertificateSHA256": "85ca0a5b32be7b18fa70de2e8a8b9d7e97c048928f16fa8d3a95018b2b086396",
+    "signatureV2V3Verified": true,
+    "zipalign16KiBVerified": true,
+    "changedCompiledScripts": [
+      "locale_text",
+      "main",
+      "board_view",
+      "trivia_catalog",
+      "trivia_ui"
+    ],
+    "currentEnglishUIPackaged": true,
+    "testBrowserDocsExcluded": true
+  },
+  "artifacts": {
+    "START.html": {
+      "bytes": 41281566,
+      "sha256": "3215b1e306fec0752a2bb19a6abc3f617570e722d726e2da1bd4f263865462d8"
+    },
+    "builds/tsuminamako-0.4.14-language-jelly-debug.apk": {
+      "bytes": 60949315,
+      "sha256": "532c5ede504bd9ec58b8af2b27969715ebe5b4e788c29c7ef71cd8d863a61e81"
+    }
+  },
+  "sourceHashes": {
+    "browser/i18n.js": "083872c3ee1464205a629e9d8923c8c6eca8c5bed36119c2b183cf1a28066b90",
+    "browser/game.js": "6b3f6631b59cb0e91f160c81beea2482e1229858872172bef5c9d29fa68ce9ad",
+    "browser/START.html": "1c4fbffa60ee54c4518706239e7e168da032826431e966a234450a389acde985",
+    "browser/style.css": "fa3ca96d216233212be09380bc04908d267d472ea49c2ffb608005f27b6bbe55",
+    "browser/locales/en.json": "feed4cf486131c05e259782240967d98e5fc4eb65cb37e201f6253cb9272eec3",
+    "browser/locale_catalog.js": "8c57812436e72f44ccfd7564a25224440a43699ce8acfbaeb39605233456c093",
+    "scripts/locale_text.gd": "ca33bae92a6bfce494cc24c7b8800387ec283a698237b0eda6792e2c836ac4d4",
+    "scripts/main.gd": "400267ec71d2881dfe16db9f0d5ff03bda75233ba550e542758e11d045f6e30d",
+    "scripts/board_view.gd": "fd39759eb41b2300764939fbc2dec42f1f6802562149b1a28f90109c880fe027",
+    "scripts/trivia_catalog.gd": "2e6a0bd666fccff0631e409743acd5aae91a17a3147bffd319210e079804c791",
+    "scripts/trivia_ui.gd": "b02eb48dc5211317ec268c940276faeba73351aefccaa9b477dc9d722a31d1fb",
+    "data/english_ui.json": "4417f81a0aa8e31bc24835f7c377744b1bcd5befacf55909d946a24425172eb8",
+    "project.godot": "3e682755410b25524ef5f43046671754f7973af2649f09345d50ff7fff0716d5",
+    "export_presets.cfg": "10243202fd105a031a25140dfa7040493ec452d24fe4f2a571e388a9e627d511",
+    "README.md": "b63c7a6298597b304c014c6a665a2c27602f6420a7b91a53faaf65977d186b09",
+    "tests/test_i18n.js": "864616fcf92dcf0f90c24f2938d5e92f63fcc5a17591eeb578f066633687cbbf",
+    "tests/test_same_color.js": "41b29d883efbae8bae33dca44e5cf2999c3749c572a8c1ab8751a957c798abf8",
+    "tests/test_clear_tales.js": "1274e4fd1dcdc00d42e30566aa2b5fd56f77ddfa21e85fb38b1b6c2dfac962b4",
+    "tests/test_top_entry_easy.js": "82a20f40ba88f26a0db59c92739060fad5acb91fee1e4ecedd494227022f6f7f",
+    "tests/test_lcd_html.js": "f2cdb77a3ab0773eda7ae6774bd2c3a9a2e5403014bc538d1d1656c2f8b93305",
+    "tests/test_os_locale.gd": "d959ae0fa354afa76bfd43fa941b97ce809a4c5127ce09b7e65e7e4a482e0c24",
+    "tests/native_translation_cases.json": "430c80d2b9c1314addabcfa1f803615a5961e6bf6074df9a6bd7b7b5c625b1b6",
+    "tests/test_card_art_locale.js": "0104d84c52699a4abd3f15858bcafc3ef1101bff19da93c137cd60358b2b551c",
+    "tests/test_card_art_browser.js": "1384543dbaeddb82baf1f3e4900403f4f9da1a0dc1ae075605646c5fb013ecda",
+    "tests/test_demo_speed.js": "af29c9c5c8bbb655b9cd66c728bb2168704a355c9e967472f1704798ec79c03f",
+    "tests/test_english_layout.js": "6879b0c0a744e0eef1ed7c1432e6ec82d39f5e22c9a74acbb54a98bce3bda1f9",
+    "tests/test_fullheight.js": "bfc0cdcd07e134fb13fe827d18d7e3f8c2def05306bd36782ff009af16c3c049",
+    "tests/test_mobile_readability.js": "bc28c465449906fa95562a3cf208c271e66becfbca0bf867debdf817b4872488",
+    "tests/test_screw_clearance.js": "e28976b284181ea24042c66f8d3e009c717ebb32cbbffe8f92b0908ece36edb2",
+    "tests/test_visual_refresh_browser.js": "23312143b0192a81550929ffdc8a0cde7e691b85e7d44d05dedc44b95550bb48"
+  },
+  "notVerified": [
+    "Physical Android installation, touch controls and rendering performance",
+    "Google Play release signing"
+  ]
+}

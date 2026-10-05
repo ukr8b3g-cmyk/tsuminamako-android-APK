@@ -24,7 +24,7 @@ async function inspect(page, name, ids){
   for(const locale of ['en','ja'])for(const [w,h,dpr] of [[540,860,1],[360,640,1],[360,800,3],[390,844,3],[412,915,3],[480,960,1],[635,1036,1],[1440,3200,1]]){
    const page=await browser.newPage({viewport:{width:w,height:h},deviceScaleFactor:dpr,hasTouch:true});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   await page.setContent(source.replace('<head>',`<head><script>window.NAMAKO_OS_LOCALE='${locale}';window.NAMAKO_TEST_MODE=true;</script>`),{waitUntil:'load'});
+   await page.setContent(source.replace('<head>',`<head><script>window.NAMAKO_TEST_LANGUAGE='${locale}';window.NAMAKO_TEST_MODE=true;</script>`),{waitUntil:'load'});
    await page.waitForFunction(()=>window.__namako);
    await page.addStyleTag({content:'*,*::before,*::after{animation:none!important;transition:none!important}'});
    await page.evaluate(()=>{const g=__namako;g.update=()=>{};g.audio.musicEnabled=false;g.audio.sfxEnabled=false;g.speedIndex=3;NamakoSession.read=()=>({});g.sync();});

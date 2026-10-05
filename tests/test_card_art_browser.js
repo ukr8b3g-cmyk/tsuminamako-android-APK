@@ -7,7 +7,7 @@ const root=require('path').resolve(__dirname,'..');
   for(const lang of ['ja','en','fr']){
    const page=await browser.newPage({viewport:{width:432,height:960}});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   const html=fs.readFileSync(root+'/START.html','utf8').replace('<head>',`<head><script>window.NAMAKO_OS_LOCALE='${lang}';window.NAMAKO_TEST_MODE=true;</script>`);
+   const html=fs.readFileSync(root+'/START.html','utf8').replace('<head>',`<head><script>window.NAMAKO_TEST_LANGUAGE='${lang}';window.NAMAKO_TEST_MODE=true;</script>`);
    await page.setContent(html,{waitUntil:'load'});
    await page.waitForFunction(()=>window.__namako);
    const result=await page.evaluate(async lang=>{

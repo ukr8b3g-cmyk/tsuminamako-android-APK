@@ -30,7 +30,7 @@ func run_checks() -> void:
 	check(main.target_ratio() == 0.95 and not main.board_view.show_ghost and main.speed_multiplier() > 1.0, "hard target, speed and no ghost")
 	main.difficulty_index = 0
 	main.sync_ui()
-	check(main.target_ratio() == 0.85 and main.board_view.show_guide, "easy target and landing guide")
+	check(main.target_ratio() == 0.7 and main.board_view.show_guide, "easy target and landing guide")
 	main.difficulty_index = 1
 	main.sync_ui()
 	main.dark_mode = true

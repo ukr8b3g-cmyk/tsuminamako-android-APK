@@ -51,6 +51,7 @@ var goal_ratio: float = 0.9
 var near_goal: bool = false
 var celebration_active: bool = false
 var celebration_clock: float = 0.0
+var match_effect: Dictionary = {}
 
 func _ready() -> void:
 	clip_contents = true
@@ -64,6 +65,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if not frozen:
+		if not match_effect.is_empty():
+			match_effect["time"] += delta
+			if float(match_effect["time"]) >= (0.35 if reduced_motion else 0.9): match_effect.clear()
 		if not reduced_motion: clock += delta
 		rotation_time = minf(1.0, rotation_time + delta / 0.28)
 		if celebration_active:
@@ -72,6 +76,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func reset_visuals() -> void:
+	match_effect.clear()
 	if impact_tween != null and impact_tween.is_valid():
 		impact_tween.kill()
 	if vanish_tween != null and vanish_tween.is_valid():
@@ -111,6 +116,86 @@ func bounce(id_value: int, center: Vector2, color_id: int) -> void:
 	impact_tween = create_tween()
 	impact_tween.tween_property(self, "impact", 0.0, 0.55).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	burst(center, COLORS[color_id], false)
+
+func start_match(event: Dictionary) -> void:
+	match_effect = event.duplicate(true)
+	match_effect["time"] = 0.0
+	var cells: Array[Vector2i] = []
+	var owners: Dictionary = {}
+	var centers: Array[Vector2] = []
+	for i in range(event["sources"].size()):
+		var middle: Vector2 = Vector2.ZERO
+		for cell in event["sources"][i]["cells"]:
+			cells.append(cell)
+			owners[cell] = i
+			middle += (Vector2(cell)+Vector2(0.5,0.5))*cell_size
+		centers.append(middle/float(event["sources"][i]["cells"].size()))
+	var center: Vector2 = Vector2.ZERO
+	var necks: Array = []
+	for cell in cells:
+		var point: Vector2 = (Vector2(cell)+Vector2(0.5,0.5))*cell_size
+		center += point
+		for direction in [Vector2i.RIGHT,Vector2i.DOWN]:
+			if owners.has(cell+direction) and owners[cell+direction] != owners[cell]: necks.append([point,point+Vector2(direction)*cell_size])
+	match_effect["all_cells"] = cells
+	match_effect["center"] = center/float(cells.size())
+	match_effect["centers"] = centers
+	match_effect["necks"] = necks
+
+func match_pose() -> Dictionary:
+	var elapsed: float = float(match_effect.get("time",0.0))
+	if reduced_motion: return {"join":0.0,"fused":0.0,"fade":clampf(elapsed/0.35,0.0,1.0),"bubbles":0.0,"jelly":0.0}
+	var join: float = clampf(elapsed/0.18,0.0,1.0)
+	return {"join":join*join*(3.0-2.0*join),"fused":smoothstep(0.18,0.32,elapsed),"fade":smoothstep(0.52,0.9,elapsed),"bubbles":clampf((elapsed-0.45)/0.45,0.0,1.0),"jelly":sin(elapsed*27.0)*exp(-maxf(0.0,elapsed-0.2)*5.0)*0.28+sin(join*PI)*0.28}
+
+func settled_creature(cells: Array[Vector2i], piece: Dictionary, id_value: int, deformation: float) -> void:
+	creature(cells, Vector2.ZERO, COLORS[int(piece["color"])], 1.0, id_value, deformation)
+
+func draw_match_effect() -> void:
+	if match_effect.is_empty(): return
+	var pose: Dictionary = match_pose()
+	var center: Vector2 = match_effect["center"]
+	var alpha: float = 1.0-float(pose["fade"])
+	var fused: float = float(pose["fused"])
+	var color: Color = COLORS[int(match_effect["color"])]
+	var ink: Color = Color("4b5544") if lcd_mode else color
+	if not reduced_motion and fused<1.0:
+		for neck in match_effect["necks"]:
+			var opacity: float = float(pose["join"])*(1.0-fused)
+			var width: float = cell_size*(0.12+float(pose["join"])*0.66)
+			draw_line(neck[0],neck[1],Color(ink,opacity),width,true)
+			draw_circle((neck[0]+neck[1])*0.5,width*0.5,Color(ink,opacity))
+			if not lcd_mode: draw_line(neck[0]+Vector2(0,-3),neck[1]+Vector2(0,-3),Color(color.lightened(0.18),opacity*0.7),width*0.7,true)
+	for i in range(match_effect["sources"].size()):
+		if fused>=1.0: break
+		var source: Dictionary = match_effect["sources"][i]
+		var cells: Array[Vector2i] = []
+		cells.assign(source["cells"])
+		var shift: Vector2 = Vector2.ZERO if reduced_motion else (center-match_effect["centers"][i])*0.06*float(pose["join"])*(1.0-fused)
+		creature(cells,shift,color,alpha*(1.0-fused),-2,float(pose["jelly"]))
+	if fused>0.0:
+		var cells: Array[Vector2i] = []
+		cells.assign(match_effect["all_cells"])
+		creature(cells,Vector2(0,-float(pose["fade"])*cell_size*0.12),color,alpha*fused,-2,float(pose["jelly"]))
+	if reduced_motion: return
+	var progress: float = float(pose["bubbles"])
+	if progress<=0.0: return
+	ink = Color("4b5544") if lcd_mode else Color("b6ffde")
+	var ring: Color = Color(ink,(1.0-progress)*0.55)
+	draw_circle(center,cell_size*(0.45+progress*1.55),ring,false,2.3,true)
+	for i in range(12):
+		var angle: float = float(i)*TAU/12.0+0.12
+		var p: Vector2 = center+Vector2.from_angle(angle)*cell_size*(0.55+progress*1.45)
+		p.y -= progress*progress*cell_size*0.45
+		draw_circle(p,(1.0-progress)*3.2+0.6,Color(ink,(1.0-progress)*0.9),false,1.3,true)
+
+func lcd_marks(center: Vector2, color_id: int, alpha: float, scale_value: float = 1.0, ink: Color = Color("b9c3a6")) -> void:
+	var count: int = clampi(color_id,0,5)+1
+	var columns: int = mini(count,3)
+	var rows: int = int(ceil(float(count)/3.0))
+	for i in range(count):
+		var p: Vector2 = center+Vector2((float(i%3)-float(columns-1)*0.5)*8.0,(floorf(float(i)/3.0)-float(rows-1)*0.5)*8.0)*scale_value
+		draw_circle(p,3.0*scale_value,Color(ink,alpha))
 
 func dissolve(cells: Array[Vector2i], color_id: int) -> void:
 	if vanish_tween != null and vanish_tween.is_valid():
@@ -217,9 +302,9 @@ func _draw() -> void:
 			draw_circle(p, cell_size * 0.45, Color("ffcd59"), false, 3.0, true)
 	if show_active and show_ghost and not active.is_empty():
 		var destination: Vector2i = model.landing(active, origin)
-		var prediction: Dictionary = model.preview(active, destination)
+		var prediction: Dictionary = model.preview(active, destination, active_color)
 		contact_ids = prediction["contacts"]
-		var ghost_color: Color = Color("309c87") if bool(prediction["keep"]) else Color("cb9954")
+		var ghost_color: Color = Color("ad7bea") if bool(prediction.get("will_clear",false)) else (Color("309c87") if bool(prediction["keep"]) else Color("cb9954"))
 		for cell in active:
 			var p: Vector2 = (Vector2(destination + cell) + Vector2(0.5, 0.5)) * cell_size
 			draw_circle(p, cell_size * 0.39, Color(ghost_color, 0.10))
@@ -230,12 +315,13 @@ func _draw() -> void:
 		var cells: Array[Vector2i] = []
 		cells.assign(piece["cells"])
 		var deformation: float = impact if id_value == impact_id else 0.0
-		creature(cells, Vector2.ZERO, COLORS[int(piece["color"])], 1.0, id_value, deformation)
+		settled_creature(cells, piece, id_value, deformation)
 		if id_value == impact_id and impact > 0.01:
 			draw_circle((Vector2(cells[0]) + Vector2(0.5, 0.5)) * cell_size, 22.0 + (1.0 - clampf(impact, 0, 1)) * 30.0, Color(1, 1, 1, clampf(impact, 0, 1) * 0.35), false, 1.8, true)
 		if show_ghost and show_active and contact_ids.has(id_value):
 			var head: Vector2 = (Vector2(cells[0]) + Vector2(0.5, 0.5)) * cell_size
 			draw_circle(head + Vector2(11, -12), 4.0, Color("fffbed"))
+	draw_match_effect()
 	if show_active and not active.is_empty():
 		creature(active, visual_origin * cell_size, COLORS[active_color], 1.0, 0, 0.0)
 	if not vanish_cells.is_empty() and vanish_progress < 1.0:
@@ -298,7 +384,8 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 			var t: float = rotation_time
 			point = old.lerp(point,t*t*(3.0-2.0*t)) + Vector2(-delta.y,delta.x)*sin(t*PI)*0.18
 		points.append(point)
-	var radius: float = cell_size * 0.425 * (1.0 - maxf(-deformation, 0.0) * 0.7)
+	var is_big: bool = id_value > 0 and model != null and model.pieces.has(id_value) and int(model.pieces[id_value].get("units", 1)) == 3
+	var radius: float = cell_size * (0.445 if is_big else 0.422) * (1.0 - maxf(-deformation, 0.0) * 0.7)
 	if lcd_mode:
 		var ink := Color(Color("4b5544"),alpha)
 		for i in range(cells.size()):
@@ -308,18 +395,19 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 					draw_line(points[i],points[j],ink,radius*1.88,true)
 		for point in points:
 			draw_circle(point,radius,ink)
+		lcd_marks(points[-1],maxi(0,COLORS.find(color)),alpha)
 		var head := points[0]
 		var face := Color(Color("b9c3a6"),alpha)
 		draw_circle(head+Vector2(-5,-3),2.6,face)
 		draw_circle(head+Vector2(5,-3),2.6,face)
 		draw_arc(head+Vector2(0,1),4,0.1,PI-0.1,10,face,1.3,true)
 		return
-	var shadow: Color = Color(color.darkened(0.40), alpha * 0.70)
+	var shadow: Color = Color(color.darkened(0.46), alpha * 0.68)
 	var body: Color = Color(color, alpha)
 	for layer in range(3):
-		var shift: Vector2 = Vector2(0, cell_size * 0.08) if layer == 0 else Vector2.ZERO
-		var ink: Color = shadow if layer == 0 else (Color(1, 1, 1, alpha * 0.18) if layer == 2 else body)
-		var r: float = radius + 1.3 if layer == 0 else (radius * 0.72 if layer == 2 else radius)
+		var shift: Vector2 = Vector2(0, cell_size * 0.055) if layer == 0 else (Vector2(-0.5,-cell_size*0.05) if layer == 2 else Vector2.ZERO)
+		var ink: Color = shadow if layer == 0 else (Color(color.lightened(0.13), alpha) if layer == 2 else Color(color.darkened(0.12), alpha))
+		var r: float = radius + 1.0 if layer == 0 else (radius * 0.89 if layer == 2 else radius)
 		for i in range(cells.size()):
 			for j in range(i + 1, cells.size()):
 				var distance: Vector2i = cells[i] - cells[j]
@@ -327,21 +415,35 @@ func creature(cells: Array[Vector2i], offset: Vector2, color: Color, alpha: floa
 					draw_line(points[i] + shift, points[j] + shift, ink, r * 1.88, true)
 		for point in points:
 			draw_circle(point + shift, r, ink)
-	for point in points:
-		draw_arc(point + Vector2(1,2),radius*0.87,0.15,1.95,9,Color(0.15,0.30,0.28,alpha*0.15),3.0,true)
+	# Tiny blunt papillae only on exposed skin, never between joined cells.
+	var occupied: Dictionary = {}
+	for cell in cells: occupied[cell] = true
 	for i in range(points.size()):
 		var point: Vector2 = points[i]
-		draw_line(point + Vector2(-6, -radius * 0.5), point + Vector2(3, -radius * 0.56), Color(1, 1, 1, alpha * 0.38), 4.0, true)
-		if i > 0:
-			draw_circle(point + Vector2(3, 6), 2.0, Color(color.darkened(0.09), alpha * 0.65))
+		for direction in [Vector2i.UP, Vector2i.LEFT, Vector2i.RIGHT]:
+			if occupied.has(cells[i]+direction): continue
+			for twist in [-0.4,0.35]:
+				var normal: Vector2 = Vector2(direction).rotated(twist)
+				var base: Vector2 = point+normal*radius*0.82
+				draw_line(base,point+normal*(radius+cell_size*0.045),Color(color.darkened(0.13),alpha),cell_size*0.065,true)
+				draw_circle(point+normal*(radius+cell_size*0.023),cell_size*0.02,Color(color.lightened(0.23),alpha))
+		for spot in range(4):
+			var angle: float = float((i*47+spot*79+id_value*13)%360)*PI/180.0
+			var p: Vector2 = point+Vector2.from_angle(angle)*radius*(0.28+float(spot%3)*0.17)
+			draw_circle(p,cell_size*(0.017+float(spot%2)*0.012),Color(color.darkened(0.24),alpha*0.42))
+		if not occupied.has(cells[i]+Vector2i.DOWN):
+			for dx in [-0.19,0.14]:
+				draw_circle(point+Vector2(cell_size*dx,radius*0.72),cell_size*0.025,Color(color.darkened(0.28),alpha*0.65))
+		draw_line(point+Vector2(-radius*0.3,-radius*0.47),point+Vector2(radius*0.15,-radius*0.54),Color(1,1,1,alpha*0.36),cell_size*0.045,true)
 	var head: Vector2 = points[0]
+	var face_scale: float = 1.12 if is_big else 1.0
 	var eye: Color = Color(Color("254b50"), alpha)
 	var blink: bool = fposmod(clock + float(id_value) * 0.31, 5.3) > 5.15
 	for dx in [-5.0, 5.0]:
 		if blink:
 			draw_line(head + Vector2(dx - 1.8, -2), head + Vector2(dx + 1.8, -2), eye, 1.5, true)
 		else:
-			draw_circle(head + Vector2(dx, -2), 2.4, eye)
+			draw_circle(head + Vector2(dx, -2)*face_scale, 2.4*face_scale, eye)
 			draw_circle(head + Vector2(dx - 0.6, -2.8), 0.7, Color(1, 1, 1, alpha))
 	draw_arc(head + Vector2(0, 1), 4.0, 0.1, PI - 0.1, 10, eye, 1.3, true)
 	draw_circle(head + Vector2(-10, 3.5), 2.7, Color(1, 1, 1, alpha * 0.25))
@@ -363,15 +465,16 @@ func draw_lcd_board() -> void:
 		var piece: Dictionary = model.pieces[key]
 		var cells: Array[Vector2i] = []
 		cells.assign(piece["cells"])
-		creature(cells,Vector2.ZERO,Color.BLACK,1,int(key),impact if int(key)==impact_id else 0)
+		settled_creature(cells,piece,int(key),impact if int(key)==impact_id else 0)
+	draw_match_effect()
 	if show_active and not active.is_empty():
 		if show_guide and guide_origin.x>=0:
-			creature(active,Vector2(guide_origin)*cell_size,Color.BLACK,0.28,0,0)
+			creature(active,Vector2(guide_origin)*cell_size,COLORS[active_color],0.28,0,0)
 		if show_ghost:
-			creature(active,Vector2(model.landing(active,origin))*cell_size,Color.BLACK,0.16,0,0)
-		creature(active,visual_origin*cell_size,Color.BLACK,1,0,0)
+			creature(active,Vector2(model.landing(active,origin))*cell_size,COLORS[active_color],0.16,0,0)
+		creature(active,visual_origin*cell_size,COLORS[active_color],1,0,0)
 	if not vanish_cells.is_empty() and vanish_progress<1:
-		creature(vanish_cells,Vector2(0,vanish_progress*25),Color.BLACK,1-vanish_progress,-1,-vanish_progress)
+		creature(vanish_cells,Vector2(0,vanish_progress*25),COLORS[vanish_color],1-vanish_progress,-1,-vanish_progress)
 	if not next_preview.is_empty():
 		var cells: Array[Vector2i] = model.shape(int(next_preview["shape"]))
 		var center := Vector2(size.x-55,40)
@@ -380,6 +483,7 @@ func draw_lcd_board() -> void:
 				if other==cell+Vector2i.RIGHT or other==cell+Vector2i.DOWN:
 					draw_line(center+Vector2(cell)*11,center+Vector2(other)*11,Color("4b5544"),9,true)
 			draw_circle(center+Vector2(cell)*11,5.5,Color("4b5544"))
+		lcd_marks(center+Vector2(0,18),int(next_preview["color"]),1.0,0.75,Color("4b5544"))
 	draw_line(Vector2(0,size.y-2),Vector2(size.x,size.y-2),Color("4b5544"),3)
 	draw_rect(Rect2(1,1,size.x-2,size.y-2),Color("697660"),false,2)
 

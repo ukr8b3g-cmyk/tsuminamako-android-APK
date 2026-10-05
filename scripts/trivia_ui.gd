@@ -129,10 +129,8 @@ func _ready() -> void:
 		tile.size = Vector2(124, 48)
 		tile.text = Locale.t(companion_names[i])
 		tile.add_theme_font_size_override("font_size", 18)
-		var path: String = "res://browser/assets/" + companion_files[i] + ("" if Locale.is_japanese() else "_en") + ".png"
-		# Assets are copied to the native tree because browser/ is excluded from APK.
-		path = path.replace("browser/assets/", "assets/trivia/")
-		tile.pressed.connect(func(): show_art(path))
+		var filename: String = companion_files[i]
+		tile.pressed.connect(func(): show_art("res://assets/trivia/" + filename + ("" if Locale.is_japanese() else "_en") + ".png"))
 		lab.add_child(tile)
 	outer.add_child(next_button)
 	apply_theme(false)

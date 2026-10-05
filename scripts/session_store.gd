@@ -7,7 +7,7 @@ static func read(path: String) -> Dictionary:
 	var raw: Variant = config.get_value("session", "state", {})
 	if not raw is Dictionary: return {}
 	var s: Dictionary = raw
-	if s.get("version", 0) != 1 or not s.get("round", null) is String or str(s["round"]).is_empty(): return {}
+	if s.get("version", 0) not in [1, 2, 3] or not s.get("round", null) is String or str(s["round"]).is_empty(): return {}
 	if not s.get("model", null) is Dictionary: return {}
 	var data: Dictionary = s["model"]
 	for key in ["next_id", "kept", "slipped", "turns", "random_state"]:
@@ -22,11 +22,15 @@ static func read(path: String) -> Dictionary:
 	for id in data["pieces"]:
 		var piece: Variant = data["pieces"][id]
 		if not id is int or id <= 0 or id >= data["next_id"] or not piece is Dictionary: return {}
-		if not piece.get("cells", null) is Array or piece["cells"].size() > 4: return {}
+		if not piece.get("units", 1) is int or piece.get("units", 1) not in [1, 3]: return {}
+		if s["version"] == 1 and piece.get("units", 1) != 1: return {}
+		if not piece.get("cells", null) is Array or piece["cells"].size() > (12 if piece.get("units", 1) == 3 else 4): return {}
 		if not piece.get("color", null) is int or piece["color"] < 0 or piece["color"] > 5: return {}
 		for cell in piece["cells"]:
 			if not cell is Vector2i: return {}
+	if not data.get("cleared", 0) is int or data.get("cleared", 0) < 0: return {}
 	var model = Rules.new()
+	model.cleared = int(data.get("cleared", 0))
 	model.board = data["board"]
 	model.pieces = data["pieces"]
 	for key in ["next_id", "kept", "slipped", "turns", "random_state"]: model.set(key, data[key])
@@ -51,10 +55,10 @@ static func read(path: String) -> Dictionary:
 static func write(game: Node, path: String) -> void:
 	if game.round_id.is_empty() or game.reward_from_demo or game.mode in [game.Mode.DEMO, game.Mode.CLEAR]: return
 	var model = game.model
-	var data: Dictionary = {"board": model.board, "pieces": model.pieces, "bag": model.bag}
+	var data: Dictionary = {"board": model.board, "pieces": model.pieces, "bag": model.bag, "cleared": model.cleared}
 	for key in ["next_id", "kept", "slipped", "turns", "random_state"]: data[key] = model.get(key)
 	if game.lore_return_mode >= 0: return
-	var state: Dictionary = {"version": 1, "round": game.round_id, "model": data, "active": game.active, "origin": game.origin, "color": game.active_color, "next": game.next_piece, "phase": 1 if game.phase == 1 else 0, "mode": "trivia" if game.mode == game.Mode.TRIVIA else "game", "trivia_id": int(game.trivia_episode.get("id", 0)), "difficulty": game.difficulty_index, "target_ratio": game.target_ratio()}
+	var state: Dictionary = {"version": 3, "round": game.round_id, "model": data, "active": game.active, "origin": game.origin, "color": game.active_color, "next": game.next_piece, "phase": 1 if game.phase == 1 else 0, "mode": "trivia" if game.mode == game.Mode.TRIVIA else "game", "trivia_id": int(game.trivia_episode.get("id", 0)), "difficulty": game.difficulty_index, "target_ratio": game.target_ratio()}
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("session", "state", state)
 	if config.save(path) != OK: push_warning("Session could not be saved.")

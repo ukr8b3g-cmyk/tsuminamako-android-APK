@@ -18,12 +18,14 @@ const TIPS: Array[String] = [
 	"床より上では、別のナマコ２匹に触れると残る。",
 	"触れるのが１匹以下なら、ぬるっと消える。",
 	"緑の影＝残る場所。茶色の影＝消える場所。",
+	"同じ色の3匹がつながると、泡になって消える。",
+	"色を分けて積もう。かんたんは6色、ふつうは4色。",
 	"水槽が80%埋まったら、仲間集合！\nみんなでくねくね、お祝いタイム。"
 ]
 const SPEED_VALUES: Array[float] = [1.0, 1.5, 2.0, 3.0, 6.0]
 const SPEED_LABELS: Array[String] = ["×1.0", "×1.5", "×2.0", "×3.0", "マッハ"]
 const DIFFICULTY_NAMES: Array[String] = ["かんたん", "ふつう", "むずかしい"]
-const DIFFICULTY_TARGETS: Array[float] = [0.85, 0.9, 0.95]
+const DIFFICULTY_TARGETS: Array[float] = [0.7, 0.9, 0.95]
 const CELEBRATION_MESSAGES: Array[String] = [
 	"やったね！ 仲間が増えたよ。",
 	"ぎゅうぎゅう。みんなでぬるぬる暮らそう。",
@@ -47,7 +49,7 @@ const CELEBRATION_MESSAGES: Array[String] = [
 	"またひとつ、にぎやかになりました。"
 ]
 const CELEBRATION_SECONDS: float = 2.3
-enum Mode { DEMO, PLAY, PAUSED, CELEBRATE, REVEAL, CLEAR, TRIVIA }
+enum Mode { DEMO, PLAY, PAUSED, CELEBRATE, REVEAL, CLEAR, TRIVIA, STUCK }
 const SessionStore = preload("res://scripts/session_store.gd")
 var session_path: String = "user://namako_session.cfg"
 var round_id: String = ""
@@ -90,6 +92,8 @@ var demo_target: int = 0
 var status_time: float = 0.0
 var round_target: float = 0.0
 var clear_packed: bool = false
+var entry_route: Array = []
+var entry_time: float = 0.0
 var celebration_stage: int = 0
 var milestone_new: bool = false
 var celebration_time: float = 0.0
@@ -128,6 +132,7 @@ var motion_button: Button
 var settings_layer: Control
 var settings_panel: Panel
 var settings_title: Label
+var language_button: Button
 var dark_mode: bool = true
 var lcd_mode: bool = false
 var lcd_metal: Texture2D = preload("res://assets/lcd_metal.png")
@@ -144,12 +149,14 @@ var modal_title: Label
 var modal_note: Label
 var modal_primary: Button
 var modal_secondary: Button
+var modal_restart: Button
 var modal_shade: ColorRect
 var celebration_panel: Panel
 var celebration_title: Label
 var celebration_note: Label
 
 func _ready() -> void:
+	Locale.load_preference()
 	get_tree().quit_on_go_back = false
 	DisplayServer.window_set_title(Locale.t("つみなまこ"))
 	# Changing the displayed project name must not strand existing collections.
@@ -194,6 +201,9 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(refresh_layout)
 	refresh_layout()
 	begin_demo()
+	for item in [ui_tip,ui_mode,ui_count,ui_fill,target_label,ui_status,ui_footer,theme_button,track_button,speed_button,music_button,sfx_button,language_button,motion_button,difficulty_button,collection_button,start_button,resume_button,demo_speed_button,modal_title,modal_note,modal_primary,celebration_title,celebration_note]:
+		item.set_meta("locale_dynamic",true)
+	Locale.capture_tree(self)
 
 func refresh_layout() -> void:
 	var window_size := DisplayServer.window_get_size()
@@ -383,7 +393,7 @@ func build_ui() -> void:
 	speed_button = button_at(Locale.t("速さ ×1.0"), Rect2(412, 55, 108, 38), cycle_speed)
 	speed_button.tooltip_text = Locale.t("速さを切替。デモではマッハも選べます")
 	difficulty_button = button_at(Locale.t("ふつう"), Rect2(210, 8, 84, 42), cycle_difficulty)
-	difficulty_button.tooltip_text = Locale.t("難易度を切替。かんたんは着地ガイド付き、むずかしいは90%目標")
+	difficulty_button.tooltip_text = Locale.t("難易度を切替。かんたん6色・70%、ふつう4色・90%、むずかしい3色・95%")
 	menu_button = button_at(Locale.t("Ⅱ ポーズ"), Rect2(300, 8, 54, 42), pause_game)
 	menu_button.tooltip_text = Locale.t("ポーズ")
 	lore_button = button_at(Locale.t("うんちく"), Rect2(268, 8, 116, 42), open_lore)
@@ -459,11 +469,12 @@ func build_ui() -> void:
 	modal_note = label_at("", Vector2(22, 75), Vector2(380, 44), 15, MUTED, modal)
 	modal_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	modal_primary = button_at("", Rect2(52, 135, 320, 54), modal_continue, true, modal)
-	button_at(Locale.t("はじめから"), Rect2(52, 199, 320, 54), begin_play, true, modal)
+	modal_restart = button_at(Locale.t("はじめから"), Rect2(52, 199, 320, 54), begin_play, true, modal)
 	modal_secondary = button_at(Locale.t("デモに戻る"), Rect2(52, 265, 320, 45), begin_demo, false, modal)
 	sync_ui()
 
 func reset_round(seed_value: int) -> void:
+	entry_route.clear()
 	round_target = 0.0
 	clear_packed = false
 	celebration_stage = 0
@@ -486,7 +497,7 @@ func reset_round(seed_value: int) -> void:
 	trivia_episode.clear()
 	board_view.stop_celebration()
 	sound.set_celebration(false)
-	next_piece = model.next_spec()
+	next_piece = model.next_spec(difficulty_index)
 	spawn_piece()
 
 func begin_demo() -> void:
@@ -546,7 +557,7 @@ func resume_saved() -> void:
 	else:
 		if phase == 1: spawn_piece()
 		else: ensure_playable_tank()
-		if mode == Mode.CELEBRATE: return
+		if mode in [Mode.CELEBRATE, Mode.STUCK]: return
 		pause_game()
 	sync_ui()
 
@@ -557,17 +568,17 @@ func cycle_track() -> void:
 func spawn_piece() -> void:
 	active = model.shape(int(next_piece["shape"]))
 	active_color = int(next_piece["color"])
-	next_piece = model.next_spec()
+	next_piece = model.next_spec(difficulty_index)
 	origin = Vector2i(int(floor(float(Rules.COLS - model.width(active)) / 2.0)), -Rules.TOP_BUFFER)
 	phase = 0
 	fall_time = 0.0
 	if not ensure_playable_tank(): return
-	if mode == Mode.DEMO:
-		var plan: Dictionary = model.demo_choice(active, model.turns > 2 and model.turns % 5 == 3)
+	if mode == Mode.DEMO and entry_route.is_empty():
+		var plan: Dictionary = model.demo_choice(active, model.turns > 2 and model.turns % 5 == 3, active_color)
 		if not plan.is_empty():
 			active.assign(plan["cells"])
-			origin.x = clampi(origin.x, 0, Rules.COLS - model.width(active))
 			var destination: Vector2i = plan["origin"]
+			origin.x = destination.x
 			demo_target = destination.x
 		else:
 			demo_target = origin.x
@@ -602,7 +613,7 @@ func _process(raw_delta: float) -> void:
 		if demo_overlay_time <= 0.0:
 			if mode == Mode.REVEAL: finish_reward()
 			else: finish_trivia()
-	if collection_open or mode in [Mode.PAUSED, Mode.CLEAR, Mode.REVEAL, Mode.TRIVIA]:
+	if collection_open or mode in [Mode.PAUSED, Mode.CLEAR, Mode.REVEAL, Mode.TRIVIA, Mode.STUCK]:
 		queue_redraw()
 		return
 	if mode == Mode.CELEBRATE:
@@ -613,9 +624,21 @@ func _process(raw_delta: float) -> void:
 		status_time = maxf(0.0, status_time - delta)
 		if status_time == 0.0:
 			update_prediction()
+	if not entry_route.is_empty():
+		entry_time += delta * speed_multiplier()
+		if entry_time >= 0.08:
+			entry_time = 0.0
+			var step: Dictionary = entry_route.pop_front()
+			active.assign(step["cells"])
+			origin = step["origin"]
+			board_view.active = active.duplicate()
+			board_view.origin = origin
+			if entry_route.is_empty(): lock_piece()
+		queue_redraw()
+		return
 	if phase != 0:
 		phase_time -= delta * (3.0 if mode == Mode.DEMO and speed_index == 4 else 1.0)
-		if phase_time <= 0.0:
+		if phase_time <= 0.0 and board_view.match_effect.is_empty():
 			if phase == 2:
 				reset_round(73 + int(clock) % 97)
 			elif goal_reached():
@@ -652,7 +675,7 @@ func process_demo(delta: float) -> void:
 		demo_wait = 0.075
 
 func try_move(change: Vector2i, audible: bool = true) -> bool:
-	if phase != 0 or (mode != Mode.PLAY and mode != Mode.DEMO):
+	if phase != 0 or not entry_route.is_empty() or (mode != Mode.PLAY and mode != Mode.DEMO):
 		return false
 	var candidate: Vector2i = origin + change
 	if not model.can_place(active, candidate):
@@ -674,7 +697,7 @@ func rotate_right() -> void:
 	rotate_piece(1)
 
 func rotate_piece(direction: int) -> void:
-	if mode != Mode.PLAY or phase != 0:
+	if mode != Mode.PLAY or phase != 0 or not entry_route.is_empty():
 		return
 	var rotated: Array[Vector2i] = model.rotate(active, direction)
 	for kick in [0, -1, 1, -2, 2, -3, 3]:
@@ -690,7 +713,7 @@ func rotate_piece(direction: int) -> void:
 			return
 
 func hard_drop() -> void:
-	if mode != Mode.PLAY or phase != 0:
+	if mode != Mode.PLAY or phase != 0 or not entry_route.is_empty():
 		return
 	origin = model.landing(active, origin)
 	board_view.origin = origin
@@ -700,6 +723,11 @@ func hard_drop() -> void:
 
 func lock_piece() -> void:
 	if phase != 0:
+		return
+	if str(model.preview(active, origin)["reason"]) in ["blocked", "overflow"]:
+		ensure_playable_tank()
+		update_prediction()
+		sync_ui()
 		return
 	var result: Dictionary = model.commit(active, origin, active_color)
 	phase = 1
@@ -714,8 +742,15 @@ func lock_piece() -> void:
 	center /= float(maxi(1, active.size()))
 	if bool(result["keep"]):
 		board_view.bounce(int(result["id"]), center, active_color)
-		sound.play("stick", mode == Mode.DEMO)
-		set_status(Locale.t("ぴたっ！　床にくっついた。") if str(result["reason"]) == "floor" else Locale.t("ぴたっ！　２匹にくっついて残った。"), 1.35)
+		if not result.get("match", {}).is_empty():
+			board_view.start_match(result["match"])
+			phase_time = 0.95
+			sound.play("merge", mode == Mode.DEMO)
+			set_status(Locale.t("ぽにゅっ！ 同じ色の%d匹が泡になった！") % int(result["match"]["count"]), 1.8)
+		else:
+			sound.play("stick", mode == Mode.DEMO)
+			var message: String = "ぴたっ！　床にくっついた。" if str(result["reason"]) == "floor" else ("大きなナマコが支えてくれた！" if str(result["reason"]) == "big" else "ぴたっ！　２匹にくっついて残った。")
+			set_status(Locale.t(message), 1.35)
 	else:
 		board_view.dissolve(absolute, active_color)
 		sound.play("slip", mode == Mode.DEMO)
@@ -733,8 +768,11 @@ func update_prediction() -> void:
 	if difficulty_index == 2:
 		ui_status.text = Locale.t("着地をよく見て、仲間をつなごう。")
 		return
-	var result: Dictionary = model.preview(active, model.landing(active, origin))
-	if bool(result["keep"]):
+	var result: Dictionary = model.preview(active, model.landing(active, origin), active_color)
+	if bool(result.get("will_clear",false)):
+		ui_status.text = Locale.t("同じ色が3匹つながる！ 色を分けよう。")
+		ui_status.add_theme_color_override("font_color",Color("ad7bea"))
+	elif bool(result["keep"]):
 		ui_status.text = Locale.t("ここなら残る！") if not bool(result["floor"]) else Locale.t("床にぴたっ。ここなら残る！")
 		ui_status.add_theme_color_override("font_color", MINT)
 	else:
@@ -757,7 +795,7 @@ func pause_game() -> void:
 	sync_ui()
 
 func modal_continue() -> void:
-	if mode == Mode.CLEAR:
+	if mode in [Mode.CLEAR, Mode.STUCK]:
 		begin_play()
 	elif mode == Mode.PAUSED:
 		mode = Mode.PLAY
@@ -765,22 +803,57 @@ func modal_continue() -> void:
 		sound.play("click")
 		sync_ui()
 
+func apply_entry_plan() -> bool:
+	var plan: Dictionary = model.entry_plan(active, mode == Mode.PLAY and difficulty_index == 0, active_color)
+	if plan.is_empty(): return false
+	var moved: bool = origin != plan["origin"] or active != plan["cells"]
+	active.assign(plan["cells"])
+	origin = plan["origin"]
+	entry_route.assign(plan["route"])
+	entry_time = 0.0
+	board_view.active = active.duplicate()
+	board_view.origin = origin
+	board_view.visual_origin = Vector2(origin)
+	board_view.show_active = true
+	phase = 0
+	fall_time = 0.0
+	if moved or not entry_route.is_empty(): set_status(Locale.t("空いている投入口から落とすよ。"), 2.0)
+	return true
+
+func show_stuck() -> void:
+	entry_route.clear()
+	board_view.show_active = false
+	pointer_down = false
+	if mode == Mode.DEMO:
+		phase = 2
+		phase_time = 1.5
+		set_status(Locale.t("水槽がいっぱい。次の水槽へ。"), 1.5)
+	else:
+		mode = Mode.STUCK
+		phase = 1
+		board_view.frozen = true
+		sync_ui()
+		SessionStore.write(self, session_path)
+
 func ensure_playable_tank() -> bool:
-	if not model.retainable_landing(active).is_empty(): return true
+	# A valid checkpoint already inside the tank must not jump back to the inlet.
+	if origin.y >= 0 and model.can_place(active, origin): return true
+	if not model.retainable_landing(active).is_empty() and apply_entry_plan(): return true
 	var available: Array[bool] = []
 	for i in range(Rules.SHAPES.size()): available.append(not model.retainable_landing(model.shape(i)).is_empty())
 	if not available.has(true):
-		show_clear(mode == Mode.DEMO, true)
+		show_stuck()
 		return false
 	for i in range(12):
 		var spec: Dictionary = next_piece
-		next_piece = model.next_spec()
+		next_piece = model.next_spec(difficulty_index)
 		if available[int(spec["shape"])]:
 			active = model.shape(int(spec["shape"]))
 			active_color = int(spec["color"])
-			origin = Vector2i(int(floor(float(Rules.COLS-model.width(active))/2.0)), -Rules.TOP_BUFFER)
-			set_status(Locale.t("この形は入らないので、入る仲間に交代！"), 2.0)
-			return true
+			if apply_entry_plan():
+				set_status(Locale.t("この形は入らないので、入る仲間に交代！"), 2.0)
+				return true
+	show_stuck()
 	return false
 
 func show_clear(from_demo: bool = false, packed: bool = false) -> void:
@@ -927,7 +1000,7 @@ func approximate_remaining() -> int:
 	return int(ceil(float(cells_needed) / (float(shape_cells) / Rules.SHAPES.size())))
 
 func target_ratio() -> float:
-	return round_target if round_target > 0.0 else DIFFICULTY_TARGETS[difficulty_index]
+	return minf(round_target, 0.7) if difficulty_index == 0 and round_target > 0.0 else (round_target if round_target > 0.0 else DIFFICULTY_TARGETS[difficulty_index])
 
 func goal_reached() -> bool:
 	return model.fill_ratio() >= target_ratio()
@@ -940,9 +1013,9 @@ func recommend_origin() -> Vector2i:
 		var start: Vector2i = Vector2i(x, -Rules.TOP_BUFFER)
 		if not model.can_place(active, start): continue
 		var spot: Vector2i = model.landing(active, start)
-		var result: Dictionary = model.preview(active, spot)
+		var result: Dictionary = model.preview(active, spot, active_color)
 		if not bool(result.get("keep", false)): continue
-		var score: float = float(spot.y * 10 + result["contacts"].size() * 2) - absf(float(x - 3)) * 0.1
+		var score: float = float(spot.y * 10 + result["contacts"].size() * 2) - (10000.0 if bool(result.get("will_clear",false)) else 0.0) - absf(float(x - 3)) * 0.1
 		if score > best_score:
 			best_score = score
 			best = spot
@@ -950,7 +1023,7 @@ func recommend_origin() -> Vector2i:
 
 func speed_multiplier() -> float:
 	var base: float = SPEED_VALUES[3 if speed_index == 4 and mode != Mode.DEMO else clampi(speed_index, 0, SPEED_VALUES.size() - 1)]
-	return base * (1.4 if difficulty_index == 2 and mode != Mode.DEMO else 1.0)
+	return base * (1.4 if difficulty_index == 2 and mode != Mode.DEMO else (0.75 if difficulty_index == 0 and mode != Mode.DEMO else 1.0))
 
 func load_speed_setting() -> void:
 	var config: ConfigFile = ConfigFile.new()
@@ -1028,6 +1101,7 @@ func sync_ui() -> void:
 	if settings_button != null:
 		settings_button.visible = mode in [Mode.DEMO, Mode.PLAY, Mode.PAUSED] and not collection_open
 		motion_button.text = Locale.t("演出を軽く: ") + ("ON" if reduced_motion else "OFF")
+		language_button.text = Locale.t("日本語 / EN") if Locale.is_japanese() else "EN / JP"
 	NightPalette.apply(self, dark_mode)
 	if trivia_ui != null: trivia_ui.apply_theme(dark_mode)
 	if card_ui != null:
@@ -1076,6 +1150,7 @@ func sync_ui() -> void:
 		settings_panel.add_theme_stylebox_override("panel", panel_style(Color("123540") if dark_mode and not lcd_mode else Color("eff9f5"), 24, Color("55aabd")))
 		settings_title.add_theme_color_override("font_color", Color("e4faf5") if dark_mode and not lcd_mode else INK)
 		set_chip_skin(motion_button, Color("215969") if dark_mode and not lcd_mode else Color("d6f5eb"), Color("55aabd"), Color.WHITE if dark_mode and not lcd_mode else INK)
+		set_chip_skin(language_button, Color("215969") if dark_mode and not lcd_mode else Color("d6f5eb"), Color("55aabd"), Color.WHITE if dark_mode and not lcd_mode else INK)
 	ui_fill.text = "%d%%" % int(floor(model.fill_ratio() * 100.0))
 	board_view.next_preview = next_piece.duplicate()
 	ui_count.text = Locale.t("あと約%d匹") % approximate_remaining()
@@ -1085,26 +1160,34 @@ func sync_ui() -> void:
 	start_button.visible = mode == Mode.DEMO
 	for button in play_buttons:
 		button.visible = mode == Mode.PLAY
-		button.disabled = phase != 0
+		button.disabled = phase != 0 or not entry_route.is_empty()
 	if mode == Mode.CELEBRATE:
 		ui_tip.text = Locale.t("やったね！ 水槽完成！")
 	elif mode != Mode.DEMO:
-		ui_tip.text = Locale.t("床なら残る。床より上は別のナマコ２匹に触れれば残る。\n１匹以下なら、ぬるっと消える。")
+		ui_tip.text = Locale.t("同じ点模様の3匹がつながると消える。模様を分けよう。\n床か2匹につくと残る。" if lcd_mode else "同じ色の3匹がつながると消える。色を分けて積もう。\n床か2匹につくと残る。")
 	else:
 		ui_tip.text = Locale.t(TIPS[int(floor(demo_clock / 5.2)) % TIPS.size()]).replace("80%", "%d%%" % int(round(target_ratio() * 100.0)))
 	ui_footer.text = Locale.t("自動デモ中  ·  ルールを見たらスタート  ·  速さボタンで変更") if mode == Mode.DEMO else (Locale.t("お祝い中…　このあとカードをゲット！") if mode == Mode.CELEBRATE else Locale.t("← → 移動   Z / X 回転   Space 落下   Esc メニュー   R やり直す"))
 	celebration_panel.visible = mode == Mode.CELEBRATE and celebration_stage == 2
 	celebration_title.text = Locale.t("ぎゅうぎゅう！ 水槽満員！") if clear_packed else Locale.t("やったね！ 水槽完成！")
 	celebration_note.text = celebration_message
-	modal.visible = (mode == Mode.PAUSED or mode == Mode.CLEAR) and not collection_open
+	modal.visible = mode in [Mode.PAUSED, Mode.CLEAR, Mode.STUCK] and not collection_open
+	modal_restart.visible = mode != Mode.STUCK
+	modal.size.y = 277 if mode == Mode.STUCK else 340
+	modal.position.y = (layout_height-277)*0.5 if mode == Mode.STUCK else 302.0+(layout_height-860.0)*0.5
+	modal_secondary.position.y = 203 if mode == Mode.STUCK else 265
 	modal_shade.visible = modal.visible
 	if mode == Mode.PAUSED:
 		modal_title.text = Locale.t("ひと休み")
 		modal_note.text = Locale.t("急がなくて大丈夫。\n「はじめから」で空の水槽からやり直せます。")
 		modal_primary.text = Locale.t("つづける")
+	elif mode == Mode.STUCK:
+		modal_title.text = Locale.t("水槽がいっぱい")
+		modal_note.text = Locale.t("もう入る場所がないよ。\n「はじめから」で新しい水槽に挑戦しよう。")
+		modal_primary.text = Locale.t("はじめから")
 	elif mode == Mode.CLEAR:
 		modal_title.text = Locale.t("仲間が増えたよ！")
-		modal_note.text = Locale.t("%s\n水槽 %d%%  ·  残った %d匹") % [str(last_reward.get("name", "")) + Locale.t("を獲得！") if not last_reward.is_empty() else celebration_message, int(floor(model.fill_ratio() * 100.0)), model.kept]
+		modal_note.text = Locale.t("%s\n水槽 %d%%  ·  残った %d匹") % [str(last_reward.get("name", "")) + Locale.t("を獲得！") if not last_reward.is_empty() else celebration_message, int(floor(model.fill_ratio() * 100.0)), model.pieces.size()]
 		modal_primary.text = Locale.t("もう一回")
 	queue_redraw()
 
@@ -1145,7 +1228,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not event.echo and key == KEY_R:
 			begin_play()
 			return
-		if mode == Mode.PAUSED or mode == Mode.CLEAR:
+		if mode in [Mode.PAUSED, Mode.CLEAR, Mode.STUCK]:
 			if not event.echo and key in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
 				modal_continue()
 			return
@@ -1166,7 +1249,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_ESCAPE, KEY_P:
 				if not event.echo:
 					pause_game()
-	if mode != Mode.PLAY or phase != 0:
+	if mode != Mode.PLAY or phase != 0 or not entry_route.is_empty():
 		return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed and Rect2(board_view.position, board_view.size).has_point(local_pointer):
@@ -1285,8 +1368,10 @@ func build_settings() -> void:
 	settings_panel.add_theme_stylebox_override("panel", panel_style(Color("eff9f5"), 24, Color("55aabd")))
 	settings_panel.set_meta("night_palette_managed", true)
 	settings_layer.add_child(settings_panel)
-	settings_title = label_at(Locale.t("設定"), Vector2(24, 20), Vector2(412, 40), 28, INK, settings_panel)
-	settings_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	settings_title = label_at(Locale.t("設定"), Vector2(24, 20), Vector2(222, 40), 28, INK, settings_panel)
+	language_button = button_at("", Rect2(270, 18, 166, 50), toggle_language, false, settings_panel)
+	language_button.add_theme_font_size_override("font_size", 20)
+	language_button.tooltip_text = Locale.t("日本語／英語を切替")
 	var buttons: Array[Button] = [theme_button, track_button, speed_button, music_button, sfx_button]
 	for i in range(buttons.size()):
 		buttons[i].reparent(settings_panel)
@@ -1332,3 +1417,19 @@ func toggle_motion() -> void:
 	config.save("user://namako_settings.cfg")
 	sync_ui()
 
+func toggle_language() -> void:
+	var previous_status: String = ui_status.text if Locale.is_japanese() else Locale.source(ui_status.text)
+	Locale.capture_tree(self)
+	Locale.set_language("en" if Locale.is_japanese() else "ja")
+	Locale.translate_tree(self)
+	cards.load_manifest()
+	trivia.reload_language()
+	if not trivia_episode.is_empty(): trivia_episode = trivia.by_id(int(trivia_episode["id"]))
+	if not last_reward.is_empty():
+		for card in cards.enabled_cards() + [cards.completion_card()]:
+			if card.get("id", "") == last_reward.get("id", ""): last_reward = card
+	DisplayServer.window_set_title(Locale.t("つみなまこ"))
+	update_prediction()
+	sync_ui()
+	ui_status.text = Locale.t(previous_status)
+	sound.play("click")

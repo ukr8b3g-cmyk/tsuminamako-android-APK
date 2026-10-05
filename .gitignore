@@ -4,6 +4,7 @@
 *.jks
 builds/
 node_modules/
+artifacts/
 __pycache__/
 tests/*_validation/
 tests/*_results.json

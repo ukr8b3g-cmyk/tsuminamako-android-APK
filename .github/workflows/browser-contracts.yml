@@ -1,5 +1,7 @@
 name: Browser contracts
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -34,3 +36,8 @@ jobs:
           server=$!
           trap 'kill "$server"' EXIT
           node tests/test_visual_refresh_browser.js
+          node tests/test_top_entry_easy.js
+          node tests/test_same_color.js
+          node tests/test_language_jelly.js
+          python3 tools/build_web_site.py
+          node tests/test_mobile_onboarding.js

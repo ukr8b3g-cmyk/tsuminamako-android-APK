@@ -1,0 +1,154 @@
+{
+  "version": "0.4.13",
+  "scope": "Local HTML and Godot implementation; local debug APK; no remote publication",
+  "createdAt": "2026-10-05T17:45:16.017584+09:00",
+  "canonicalRuntime": "D:\\Godot_v4.7.2-stable_win64.exe\\NamakoTsumi_v0.4",
+  "snapshot": "D:\\Codex\\_snapshots\\NamakoTsumi\\20261005_171509_same_color_clear",
+  "rule": "Three or more orthogonally connected, retained same-colour namako disappear; other colours stay; no new large namako.",
+  "difficulty": [
+    {
+      "name": "Easy",
+      "colours": 6,
+      "target": 0.7,
+      "speedMultiplier": 0.75,
+      "avoidMatchingGuide": true
+    },
+    {
+      "name": "Normal",
+      "colours": 4,
+      "target": 0.9,
+      "speedMultiplier": 1
+    },
+    {
+      "name": "Hard",
+      "colours": 3,
+      "target": 0.95,
+      "speedMultiplier": 1.4
+    }
+  ],
+  "tests": {
+    "browserRules": {
+      "passed": 22,
+      "randomInvariantChecks": 10000,
+      "easyPlannedClears": "100/100 at 70%"
+    },
+    "browserSameColour": {
+      "passedCases": 12,
+      "locales": [
+        "ja",
+        "en"
+      ],
+      "themes": [
+        "light",
+        "dark",
+        "lcd"
+      ],
+      "sizes": [
+        [
+          320,
+          568
+        ],
+        [
+          412,
+          915
+        ]
+      ],
+      "covers": [
+        "actual lock and disappearance",
+        "mixed colours remain",
+        "sound embedding",
+        "pause",
+        "v3 save and actual resume",
+        "v1/v2 backward read",
+        "reduced motion",
+        "Mach effect wait",
+        "demo does not grant cards"
+      ]
+    },
+    "browserTopEntryEasy": {
+      "passedCases": 6,
+      "actualEasyGuideSeeds": [
+        1,
+        73,
+        2026
+      ]
+    },
+    "browserClearTales": {
+      "passedCases": 12,
+      "realGoalLock": true
+    },
+    "browserI18n": "PASS: UI/HTML literal coverage, primary locale and 200 entries",
+    "nativeRules": {
+      "passed": 39,
+      "failed": 0,
+      "browserReferencePlacements": 300
+    },
+    "nativeSameColour": {
+      "passedCases": 6,
+      "failures": 0,
+      "backwardSaveRead": true
+    },
+    "nativeTopEntryEasy": {
+      "passedLocales": 2,
+      "failures": 0
+    },
+    "nativeWindowsRendering": {
+      "passedCases": 6,
+      "imagesViewed": [
+        "ja dark match mid",
+        "ja LCD dot patterns"
+      ]
+    }
+  },
+  "saveFormat": {
+    "writeVersion": 3,
+    "readVersions": [
+      1,
+      2,
+      3
+    ],
+    "legacyLargePiecesPreserved": true
+  },
+  "apk": {
+    "versionCode": 13,
+    "versionName": "0.4.13",
+    "package": "com.namakotsumi.prototype",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "architecture": "arm64-v8a",
+    "signerCertificateSHA256": "85ca0a5b32be7b18fa70de2e8a8b9d7e97c048928f16fa8d3a95018b2b086396",
+    "signatureV2V3Verified": true,
+    "zipalign16KiBVerified": true,
+    "changedCompiledScriptsComparedWithV0412": true,
+    "currentEnglishUIPackaged": true,
+    "testAndBrowserFilesExcluded": true
+  },
+  "artifacts": {
+    "START.html": {
+      "bytes": 41277507,
+      "sha256": "7b69a295c6961a9858e217bb96f1f01ee3e9075f3aff9cc57131942548b1124c"
+    },
+    "builds/tsuminamako-0.4.13-same-color-debug.apk": {
+      "bytes": 60945219,
+      "sha256": "fc14cd57be9f484a523f10a52e015711257eb13fb59c7c33f274f1742bb88ec9"
+    }
+  },
+  "sourceHashes": {
+    "scripts/rules.gd": "c75fa1e720b41c4d11cfb6c8b3433382cae164e98ce661eaf6e4e88a103ce1ea",
+    "scripts/main.gd": "7927274a43696ac648c869b3b5091e9fd86e801e7edea9a0ec35a42c6455e213",
+    "scripts/board_view.gd": "143d1eb9ce12b1b80b4633a210ae9cf9015b0092e0b3155d4cb9e6a31fb245e5",
+    "scripts/session_store.gd": "8273711e2f8f9126e425da3c3ce1810f868c06b089cf00ab573f6e0a4fdcc61a",
+    "browser/rules.js": "94d9bae05a07c73351c9e91b19c36778836653408368b3842ac5b21683e28ed7",
+    "browser/game.js": "6666308d8c19dd2d245495f0b3e0e0030dc676642f9960117d107d7dc0d232cc",
+    "browser/session.js": "a60955f2e62eed5ab67a756fd96fc0978e87e384f4afd1a24d291354b8cb1102",
+    "browser/START.html": "13f1ceecdada5baf98b2e2aa4ea45348e20b37fcc7c8277daa3646f31f821c04",
+    "data/english_ui.json": "1653d1605c1f86f9805d96e4eb9fa6adddb031bd3c02d48f2517509e59eb32c8",
+    "browser/locales/en.json": "37e12859a37923485764a24f5d670cbb94fc7b7f5b4bce865c07c27c63c49c75",
+    "project.godot": "335fcddd4c81a09d302906945afe0c71377bc73a781eeeab7f038dcd9fd43ed7",
+    "export_presets.cfg": "8d36b0b69fafed258630e9a9e33a3198512903d9ad399da7355fc4386742382c"
+  },
+  "limitations": [
+    "No physical Android installation/touch/audio/performance check.",
+    "A simple planner is not guaranteed to win Normal or Hard with the matching rule."
+  ]
+}

@@ -16,7 +16,7 @@ func _initialize() -> void:
 			var result: String = Locale.t(str(value))
 			assert(result == value if expected else japanese.search(result) == null, str(value) + " => " + result)
 		var lore: RefCounted = Trivia.new()
-		assert(lore.episodes.size() == 100)
+		assert(lore.episodes.size() == 200)
 		for episode in lore.episodes:
 			assert(int(episode.id) > 0)
 			assert(expected or japanese.search(str(episode.title) + str(episode.body)) == null)
@@ -25,5 +25,7 @@ func _initialize() -> void:
 			assert(expected or japanese.search(str(card.name)) == null)
 	assert(Locale.missing.is_empty())
 	Locale.test_language = ""
-	print("PASS native OS locale: ", OS.get_locale_language(), "; 8 language branches, all UI literals, 100 native stories, 20 collectible names")
+	Locale.selected_language = "ja"
+	assert(Locale.is_japanese(), "default is Japanese regardless of OS locale")
+	print("PASS native translation fixtures: 8 language branches, all UI literals, 200 stories, collectible names; initial language Japanese")
 	quit(0)

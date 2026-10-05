@@ -13,10 +13,13 @@ for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-
  const sandbox={window:{},location:{search:os?"?namako_os_locale="+os:""},navigator:{language:locale},document,NodeFilter:{SHOW_TEXT:4},URLSearchParams,console:{warn(){}}};
  vm.createContext(sandbox);
  for(const file of ['card_catalog.js','trivia_catalog.js','locale_catalog.js','i18n.js'])vm.runInContext(read('browser/'+file),sandbox);
- const local=sandbox.NamakoI18n,japanese=(os||locale).startsWith('ja');
- assert.equal(local.locale,japanese?'ja':'en');
- assert.equal(local.t('スタート'),japanese?'スタート':'Start');
- assert.equal(sandbox.window.NAMAKO_TRIVIA_CATALOG.episodes[0].title,japanese?ja.entries[0].title:en.lore.entries[0].title);
+ const local=sandbox.NamakoI18n;
+ assert.equal(local.locale,'ja','First launch must be Japanese for every OS locale');
+ assert.equal(local.t('スタート'),'スタート');
+ assert.equal(sandbox.window.NAMAKO_TRIVIA_CATALOG.episodes[0].title,ja.entries[0].title);
+ local.setLanguage('en',false);const japanese=false;
+ assert.equal(local.locale,'en');assert.equal(local.t('スタート'),'Start');
+ assert.equal(sandbox.window.NAMAKO_TRIVIA_CATALOG.episodes[0].title,en.lore.entries[0].title);
  if(!japanese){
   for(const name of ['game.js','rewards.js']){
    const source=read('browser/'+name);
@@ -38,7 +41,7 @@ for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-
   const game=read('browser/game.js');
   vm.runInContext(game.slice(0,game.indexOf('const game=new NamakoApp();'))+'\nglobalThis.TestApp=NamakoApp;',sandbox);
   const app=Object.create(sandbox.TestApp.prototype);
-  Object.assign(app,{model:{fillRatio:()=>10/96,fillCount:()=>10,kept:10},cards:{rewardsEnabled:()=>true,ownedUnique:()=>2,enabledCards:()=>Array(20).fill({}),milestoneUnlocked:()=>false},audio:{trackLabel:()=>'Tide Garden',musicEnabled:true,sfxEnabled:true,play(){}},difficultyIndex:1,speedIndex:0,phase:0,demoClock:0,collectionOpen:false,celebrationMessage:'A new friend!',rewardFromDemo:false,lastReward:{name:'Jade Namako'},trivia:{episodes:en.lore.entries}});
+  Object.assign(app,{model:{fillRatio:()=>10/96,fillCount:()=>10,kept:10,pieces:new Map(Array.from({length:10},(_,i)=>[i+1,{}]))},cards:{rewardsEnabled:()=>true,ownedUnique:()=>2,enabledCards:()=>Array(20).fill({}),milestoneUnlocked:()=>false},audio:{trackLabel:()=>'Tide Garden',musicEnabled:true,sfxEnabled:true,play(){}},difficultyIndex:1,speedIndex:0,phase:0,entryRoute:[],demoClock:0,collectionOpen:false,celebrationMessage:'A new friend!',rewardFromDemo:false,lastReward:{name:'Jade Namako'},trivia:{episodes:en.lore.entries}});
   for(const mode of ['demo','play','paused','clear','celebrate','reveal','trivia']){
    app.mode=mode;app.sync();if(mode==='trivia')app.renderTrivia(en.lore.entries[0]);
    for(const [id,element]of elements)assert(!/[ぁ-んァ-ヶ一-龯]/u.test(element.textContent+JSON.stringify(element.attrs)),mode+' '+id);
@@ -46,9 +49,11 @@ for(const [locale,os] of [['ja',''],['ja-JP',''],['ja_JP',''],['en-US',''],['fr-
   app.openTriviaCard('existing-image.png','Korisuke');assert.equal(document.getElementById('trivia-card-viewer').hidden,false);
   app.closeTriviaCard();assert.equal(document.getElementById('trivia-card-viewer').hidden,true);
  }
+ local.setLanguage('ja',false);assert.equal(local.t('スタート'),'スタート');
+ assert.equal(sandbox.window.NAMAKO_TRIVIA_CATALOG.episodes[0].title,ja.entries[0].title);
 }
 const standalone=read('START.html');
 assert(standalone.includes('window.NAMAKO_EN='));
 assert.equal((standalone.match(/data-en-src="data:image\/webp;base64,/g)||[]).length,3);
 assert(!standalone.includes('<script src='));
-console.log('PASS: primary locale ja => Japanese; all others => English; 200 stories, UI literal/HTML coverage, 3 embedded English character images.');
+console.log('PASS: Japanese by default for every OS locale; explicit EN/JA switching; 200 stories, UI literal/HTML coverage, 3 embedded English character images.');

@@ -2,7 +2,7 @@ const fs=require('fs'),path=require('path'),assert=require('assert'),{chromium}=
 (async()=>{const b=await chromium.launch(require('./browser_test_support').launchOptions);try{
 for(const lang of ['ja','en'])for(const [width,height]of [[320,568],[390,844],[1080,2400],[1440,3200]]){
 const p=await b.newPage({viewport:{width,height}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
-await p.route('https://namako.test/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(__dirname,'../START.html'),'utf8').replace('<head>',`<head><script>window.NAMAKO_OS_LOCALE='${lang}';window.NAMAKO_TEST_MODE=true;</script>`)}));
+await p.route('https://namako.test/**',r=>r.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(__dirname,'../START.html'),'utf8').replace('<head>',`<head><script>window.NAMAKO_TEST_LANGUAGE='${lang}';window.NAMAKO_TEST_MODE=true;</script>`)}));
 await p.goto('https://namako.test');await p.waitForFunction(()=>window.__namako);
 for(const theme of ['dark','light','lcd']){
 await p.evaluate(theme=>{__namako.dark=theme==='dark';__namako.lcd=theme==='lcd';__namako.speedIndex=0;__namako.sync();__namako.resize();},theme);

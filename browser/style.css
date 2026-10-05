@@ -287,3 +287,32 @@ html[data-reduced="true"] *,html[data-reduced="true"] *:before,html[data-reduced
 button.primary{background-color:#f56848}html[data-theme="light"] #controls>button:not(.primary){background-color:#b9f1eb}#settings-open{font-size:18px}html[data-theme="lcd"] #controls>button{border-radius:40px}
 
 #music-volume{position:absolute;left:236px;top:328px;width:200px;height:74px;accent-color:#218f9f;cursor:pointer}#cards-button{white-space:pre-line;line-height:1.2}
+#settings-title{width:222px;text-align:left}
+#language-toggle{position:absolute;left:270px;top:18px;width:166px;height:50px;font-size:20px;white-space:nowrap}
+
+/* Mobile web: readable controls and an unscaled first-visit guide. */
+html{overscroll-behavior:none}body{overscroll-behavior:none}
+body[data-landscape="true"]{height:auto;min-height:100dvh;overflow-y:auto;align-items:flex-start}
+body[data-landscape="true"] #wrap{margin:12px auto}
+#stage[data-touch="true"] :is(#settings-open,#difficulty,#menu,#lore-button,#cards-button,#demo-speed){font-size:max(18px,var(--touch-header-font))!important;height:max(74px,var(--touch-target-height))!important;white-space:pre-line;line-height:1.15;padding:2px}
+#stage[data-touch="true"] #tip{font-size:max(17px,var(--touch-body-font))!important;line-height:1.18;padding:5px 12px}
+#stage[data-touch="true"] :is(#target,#count,#next-label){font-size:max(16px,var(--touch-small-font))!important}
+#stage[data-touch="true"] #status{font-size:max(17px,var(--touch-small-font))!important;line-height:1.15;white-space:normal;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;padding:2px 8px}
+#stage[data-touch="true"] #footer{font-size:var(--touch-small-font)!important;white-space:normal;line-height:1.15!important}
+#stage[data-touch="true"] #controls>button{font-size:max(23px,var(--touch-body-font))!important}
+html[data-theme="lcd"] #stage[data-touch="true"] :is(#settings-open,#difficulty,#menu,#lore-button,#cards-button,#demo-speed){height:max(74px,var(--touch-target-height))!important}
+#menu{white-space:pre-line;line-height:1.1}
+#help-open{left:52px;top:331px;width:320px;height:52px;font-size:22px}
+#intro-layer{position:fixed;inset:0;z-index:100;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;background:radial-gradient(ellipse at top,#185b6c,#071c2a 75%);padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));color:#e8fbff;-webkit-user-select:text;user-select:text}
+#intro-sheet{width:100%;max-width:540px;margin:auto;padding:12px 8px 20px}
+.intro-header{display:flex;align-items:center;justify-content:space-between;gap:8px}.intro-badge{font-size:13px;color:#a4e9ea;font-weight:700}
+#intro-layer button{position:static;min-height:48px;font-size:16px;padding:9px 16px;color:#e8fbff;border:2px solid #5cb8ce;background:#174556;box-shadow:0 4px 0 #092936;border-radius:16px;white-space:normal}
+#intro-layer button.primary{background:#f77e5d;border-color:#ffab78;box-shadow:0 4px 0 #914932;color:white}
+#intro-language{font-size:13px!important;min-height:44px!important;padding:7px 12px!important}
+#intro-title{position:static;margin:14px 0 3px;text-align:center;font-size:clamp(30px,8vw,44px);letter-spacing:.04em;line-height:1.1}.intro-lead{font-size:15px;text-align:center;margin:8px 0 6px;color:#c3f4f4}
+.intro-hero{display:block;width:100%;max-height:165px;margin:6px auto 12px;filter:drop-shadow(0 6px 6px #0003)}
+.intro-how{font-size:20px;margin:8px 0 10px;text-align:center}.intro-steps{display:grid;gap:9px}
+.intro-steps article{display:grid;grid-template-columns:22px 94px 1fr;gap:7px;align-items:center;padding:9px;border:1px solid #58a7ba;border-radius:16px;background:#174455;box-shadow:inset 0 1px 0 #ffffff20}
+.intro-steps svg{width:94px;height:48px}.step-number{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#93e5d5;color:#123b47;font-size:14px;font-weight:900}.intro-steps h4{font-size:16px;line-height:1.25;margin:0 0 4px}.intro-steps p{font-size:13px;line-height:1.35;margin:0;color:#c5e7ed}
+.intro-touch{font-size:13px;line-height:1.5;text-align:center;margin:14px 2px 6px;color:#acf0ed}.intro-goal{font-size:14px;line-height:1.5;text-align:center;margin:6px 0 13px;color:#fff0bc}.intro-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.intro-actions button{width:100%;min-height:56px!important;font-size:18px!important;font-weight:800}.intro-actions #intro-return{grid-column:1/-1}
+@media(max-width:360px){.intro-steps article{grid-template-columns:20px 70px 1fr;gap:6px;padding:8px}.intro-steps svg{width:70px;height:42px}.intro-steps h4{font-size:15px}.intro-hero{max-height:135px}}

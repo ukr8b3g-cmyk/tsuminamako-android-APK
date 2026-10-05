@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
-<title>つみなまこ v0.4.10 — ツミナマコ研究手帖</title>
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a1822">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>つみなまこ v0.4.14 — ツミナマコ研究手帖</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +16,7 @@
 <button id="theme" class="small" aria-label="ダークモード切替" aria-pressed="false">夜モード</button>
 <button id="music" class="small" title="BGMのオン／オフ">BGM ON</button>
 <button id="sfx" class="small" title="効果音のオン／オフ">SE ON</button>
-<div id="version">DEEP SEA STACK</div><button id="speed" class="small" title="落下スピードを変更">速さ ×1.0</button><button id="menu" class="small" hidden>Ⅱ ポーズ</button>
+<div id="version">DEEP SEA STACK</div><button id="speed" class="small" title="落下スピードを変更">速さ ×1.0</button><button id="menu" class="small" hidden>Ⅱ メニュー</button>
 <div id="tip"></div><button id="lore-button" class="small" aria-label="博士のうんちくを読む">うんちく</button><button id="cards-button" class="small" hidden>図鑑 0/20</button><div id="mode">AUTO DEMO</div><div id="count"></div>
 <div id="fill-label">FILL</div><div id="fill">0%</div><div id="target">/ 90%</div><div id="next-label">NEXT</div>
 <div id="status" role="status" aria-live="polite"></div>
@@ -28,13 +30,14 @@
 <button id="drop" class="primary" title="一気に落とす（Space）">落とす ↓</button>
 </div>
 <div id="footer"></div>
-<div id="settings-layer" hidden><section id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title"><h2 id="settings-title">設定</h2><input id="music-volume" type="range" min="0" max="100" step="5" value="70" aria-label="BGM音量"><button id="motion-toggle">演出を軽く: OFF</button><button id="settings-close" class="primary">閉じる</button></section></div>
+<div id="settings-layer" hidden><section id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title"><h2 id="settings-title">設定</h2><button id="language-toggle" title="日本語／英語を切替">日本語 / EN</button><input id="music-volume" type="range" min="0" max="100" step="5" value="70" aria-label="BGM音量"><button id="motion-toggle">演出を軽く: OFF</button><button id="settings-close" class="primary">閉じる</button></section></div>
 <div id="shade" hidden></div>
 <section id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
 <h2 id="modal-title"></h2><div id="modal-note"></div>
 <button id="continue" class="primary">つづける</button>
 <button id="restart-pause" class="primary">はじめから</button>
-<button id="to-demo">デモに戻る</button>
+<button id="to-demo">デモを見る</button>
+<button id="help-open">遊び方</button>
 </section>
 <section id="reward" role="dialog" aria-modal="true" aria-labelledby="reward-title" hidden>
 <h2 id="reward-title">カードをゲット！</h2>
@@ -58,9 +61,31 @@
 <div id="collection-progress"></div><div id="collection-grid"></div>
 </section>
 </main></div>
+<section id="intro-layer" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
+ <div id="intro-sheet">
+  <header class="intro-header"><span class="intro-badge">ぬるっと水槽パズル</span><button id="intro-language">日本語 / EN</button></header>
+  <h2 id="intro-title">つみなまこ</h2><p class="intro-lead">消さずに残して、水槽をいっぱいに。</p>
+  <svg class="intro-hero" viewBox="0 0 480 170" aria-hidden="true">
+   <defs><linearGradient id="intro-water" x2="0" y2="1"><stop stop-color="#99f5ef"/><stop offset="1" stop-color="#3493c0"/></linearGradient>
+   <g id="intro-namako"><rect width="106" height="38" rx="19" fill="currentColor"/><path d="M19 8H87" stroke="#fff" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/><g fill="#264b5a"><circle cx="22" cy="20" r="2.5"/><circle cx="36" cy="20" r="2.5"/></g><path d="M25 24Q29 30 33 24" stroke="#264b5a" stroke-width="2" fill="none"/><g fill="#fff" opacity=".22"><circle cx="54" cy="20" r="7"/><circle cx="76" cy="20" r="7"/></g></g></defs>
+   <rect x="63" y="7" width="354" height="156" rx="25" fill="url(#intro-water)" stroke="#63e7ff" stroke-width="7"/><path d="M81 147H399" stroke="#f6d07f" stroke-width="9" stroke-linecap="round"/>
+   <g color="#f7d86e"><use href="#intro-namako" x="80" y="105"/></g><g color="#8be0bf"><use href="#intro-namako" x="189" y="105"/></g><g color="#ba9ded"><use href="#intro-namako" x="298" y="105"/></g>
+   <g color="#ff96b1"><use href="#intro-namako" x="134" y="66"/></g><g color="#87dbe5"><use href="#intro-namako" x="243" y="66"/></g><g color="#ffb481"><use href="#intro-namako" x="190" y="18"/></g>
+   <g fill="none" stroke="#fff" opacity=".65"><circle cx="96" cy="59" r="9"/><circle cx="375" cy="44" r="7"/><circle cx="352" cy="82" r="4"/></g>
+  </svg>
+  <h3 class="intro-how">遊び方</h3>
+  <div class="intro-steps">
+   <article><span class="step-number">1</span><svg viewBox="0 0 140 65" aria-hidden="true"><path d="M8 57H132" stroke="#f6d07f" stroke-width="6"/><g color="#8be0bf"><use href="#intro-namako" transform="translate(18 15) scale(.95)"/></g><path d="M70 2V12" stroke="#94eaff" stroke-width="3"/><path d="M65 8L70 13L75 8" fill="none" stroke="#94eaff" stroke-width="3"/></svg><div><h4>床につくと残る</h4><p>まずは水槽の底に、ぴたっ。</p></div></article>
+   <article><span class="step-number">2</span><svg viewBox="0 0 140 65" aria-hidden="true"><g color="#ffb481"><use href="#intro-namako" transform="translate(9 38) scale(.56)"/></g><g color="#ba9ded"><use href="#intro-namako" transform="translate(72 38) scale(.56)"/></g><g color="#8be0bf"><use href="#intro-namako" transform="translate(42 13) scale(.56)"/></g><g stroke="#fff" stroke-width="2" fill="none"><circle cx="57" cy="36" r="5"/><circle cx="83" cy="36" r="5"/></g></svg><div><h4>2匹にふれると残る</h4><p>床より上で、1匹だけだと消えるよ。</p></div></article>
+   <article><span class="step-number">3</span><svg viewBox="0 0 140 65" aria-hidden="true"><g color="#ff96b1"><use href="#intro-namako" transform="translate(4 25) scale(.36)"/><use href="#intro-namako" transform="translate(43 25) scale(.36)"/><use href="#intro-namako" transform="translate(82 25) scale(.36)"/></g><g stroke="#c4f9ff" fill="none" stroke-width="2"><circle cx="108" cy="12" r="6"/><circle cx="120" cy="45" r="5"/><circle cx="127" cy="19" r="3"/></g></svg><div><h4>同じ色の3匹は泡になる</h4><p>色を分けて積むのがコツ！</p></div></article>
+  </div>
+  <p class="intro-touch">スライドで移動 · タップで回転 · 下へスワイプで落とす</p>
+  <p class="intro-goal">目標まで埋めるとクリア。カードがもらえるよ。</p>
+  <div class="intro-actions"><button id="intro-demo">デモを見る</button><button id="intro-play" class="primary">遊ぶ ▶</button><button id="intro-return" hidden>ゲームへ戻る</button></div>
+ </div>
+</section>
 <noscript>このお試し版ではJavaScriptを有効にしてください。通信・ログインは不要です。</noscript>
 <script src="card_catalog.js"></script><script src="trivia_catalog.js"></script><script src="locale_catalog.js"></script><script src="i18n.js"></script><script src="trivia.js"></script><script src="cards.js"></script><script src="rules.js"></script><script src="rewards.js"></script><script src="session.js"></script><script src="game.js"></script>
 </body>
 </html>
-
 

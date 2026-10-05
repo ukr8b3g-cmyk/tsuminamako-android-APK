@@ -8,7 +8,7 @@ const {chromium}=require('playwright');
   for(const lang of ['ja','en']) for(const [width,height,dpr] of [[320,568,2],[390,844,3],[540,1200,2],[540,1200,8/3],[1280,800,1]]){
    const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:dpr,locale:lang});
    const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   await page.addInitScript(lang=>{window.NAMAKO_OS_LOCALE=lang;window.NAMAKO_TEST_MODE=true;},lang);
+   await page.addInitScript(lang=>{window.NAMAKO_TEST_LANGUAGE=lang;window.NAMAKO_TEST_MODE=true;},lang);
    await page.goto((process.env.NAMAKO_TEST_URL||'http://127.0.0.1:8765/browser/START.html')+'?test=1');
    await page.waitForFunction(()=>window.__namako);
    for(const theme of ['dark','light','lcd']){

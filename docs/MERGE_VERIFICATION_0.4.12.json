@@ -1,0 +1,40 @@
+{
+  "version": "0.4.12",
+  "versionCode": 12,
+  "verifiedAt": "2026-10-05T16:51:28",
+  "snapshot": "D:/Codex/_snapshots/NamakoTsumi/20261005_161728_triple_merge",
+  "snapshotFiles": 56,
+  "apk": {
+    "path": "builds/tsuminamako-0.4.12-merge-debug.apk",
+    "bytes": 60945219,
+    "sha256": "9bece3d4044a28a5a608fc3559844d5e149793e992973ab0cd21400052cc07b5",
+    "signatureVerified": true,
+    "certificateSha256": "85ca0a5b32be7b18fa70de2e8a8b9d7e97c048928f16fa8d3a95018b2b086396",
+    "zipalign16kVerified": true,
+    "minSdk": 24,
+    "targetSdk": 36,
+    "abi": "arm64-v8a"
+  },
+  "tests": {
+    "mergeBrowserCases": 12,
+    "mergeNativeLanguageThemeCases": 6,
+    "lcdBrowserViewportCases": 8,
+    "lcdNativeLayoutCases": 48,
+    "nativeRulePasses": 39,
+    "referencePlacements": 300,
+    "browserRulePasses": 22,
+    "browserRandomInvariantPlacements": 10000,
+    "browserPlannedClears": "100/100",
+    "topEntryBrowserCases": 6,
+    "topEntryNative": "PASS",
+    "clearRewardBrowserCases": 12,
+    "nativeResume": "PASS with pre-existing exit resource warnings",
+    "i18n": "PASS"
+  },
+  "visuals": {
+    "nativeRenderedAndInspected": true,
+    "browserRenderedAndInspected": true
+  },
+  "physicalAndroidVerified": false,
+  "githubPublished": false
+}
