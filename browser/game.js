@@ -52,7 +52,7 @@ class NarrationVoice{
  constructor(bank){this.bank=bank;this.voice=new Audio();this.voice.preload='auto';this.current=null;this.state='idle';this.generation=0;this.attempt=0;this.retryTimer=null;this.startTimer=null;this.cache=new Map();this.diagnostics=[];this.onChange=()=>{};
   this.voice.addEventListener('ended',()=>{if(this.state==='playing')this.finish('done');});
   this.voice.addEventListener('error',()=>{if(this.bank.narrationActive)this.fail(this.generation,this.attempt,{name:'MediaError',code:this.voice.error?.code});});
-  this.preloaded=Promise.all(NARRATION_VOICES.map(async name=>{try{const response=await fetch(audioSource(name));if(!response.ok)throw new Error('HTTP '+response.status);this.cache.set(name,URL.createObjectURL(await response.blob()));}catch(_){/* Local file previews can use the original URL directly. */}}));
+  this.preloaded=Promise.all(NARRATION_VOICES.map(async name=>{try{const source=audioSource(name);if(new URL(source,document.baseURI).protocol==='file:')return;const response=await fetch(source);if(!response.ok)throw new Error('HTTP '+response.status);this.cache.set(name,URL.createObjectURL(await response.blob()));}catch(_){/* Use the original URL when preload is unavailable. */}}));
  }
  log(event,error){this.diagnostics.push({event,clip:this.current,state:this.state,error:error?.name||null,code:error?.code||this.voice.error?.code||null,readyState:this.voice.readyState,networkState:this.voice.networkState});if(this.diagnostics.length>20)this.diagnostics.shift();}
  allowed(){return this.bank.unlocked&&this.bank.sfxEnabled&&!this.bank.openingActive&&!this.bank.suspended&&!document.hidden;}

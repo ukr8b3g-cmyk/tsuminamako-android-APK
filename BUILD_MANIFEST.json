@@ -107,7 +107,7 @@
     "browser/assets/trivia_professor_en.webp.import": "8782ec120121adcb73366f3f0238626218771e9820714c4fdfe4a7bba6e37d01",
     "browser/card_catalog.js": "4e4706ccdef627bf51011d7dc8b5de2928b5249d960e34931ec1b9efe991c16b",
     "browser/cards.js": "ae1f83282b0e5ff6eff98eec9fadf87350223cc4982c2ffc4fe80b18108d8cc1",
-    "browser/game.js": "7bf586a59f413d052004b974012703cbaa569a02d69d9c55091a170d75a2cad2",
+    "browser/game.js": "4b43c74f685989c2a90911504e95e25877bc16427f3db2df9c8722817033e432",
     "browser/i18n.js": "083872c3ee1464205a629e9d8923c8c6eca8c5bed36119c2b183cf1a28066b90",
     "browser/locale_catalog.js": "764de662115ab731e4dfd7cb9744b2aa48fd31add64261de429ec15f67078ea8",
     "browser/locales/en.json": "cee266e097fb401ce5fe0f4c1408f88f687bf266c676d6b4b2118f98cdd21e8f",
