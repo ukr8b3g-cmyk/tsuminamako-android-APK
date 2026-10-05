@@ -41,3 +41,6 @@ jobs:
           node tests/test_language_jelly.js
           python3 tools/build_web_site.py
           node tests/test_mobile_onboarding.js
+          node tests/test_opening_audio.js
+          node tests/test_clear_audio.js
+          node tests/test_lcd_colors.js

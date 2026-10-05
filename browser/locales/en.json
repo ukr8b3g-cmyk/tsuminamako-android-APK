@@ -1,5 +1,13 @@
 {
   "ui": {
+    "▶ 音声を聞く": "▶ Play opening audio",
+    "■ 音声を止める": "■ Stop audio",
+    "↻ もう一度聞く": "↻ Listen again",
+    "▶ タップで音声を再生": "▶ Tap to play audio",
+    "音声 OFF（SE設定）": "Audio OFF (SFX setting)",
+    "音声を準備中…": "Loading audio…",
+    "▶ 音声を再試行": "▶ Retry audio",
+    "同じ色・点模様の3匹がつながると泡になる。色を分けよう。\n床か2匹につくと残る。": "Three of the same colour and dot pattern turn into bubbles.\nMix colours; stay on the floor or touch two friends.",
     "つみなまこ": "Tsumi Namako",
     "ツミナマコ研究手帖": "Research Notes",
     "ツミナマコは架空の生き物です。": "Tsumi Namako are fictional creatures.",

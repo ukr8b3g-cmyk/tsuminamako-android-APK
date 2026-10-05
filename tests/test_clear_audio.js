@@ -1,0 +1,28 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..'),url=process.env.NAMAKO_TEST_URL||pathToFileURL(path.join(root,'artifacts/web/index.html')).href;
+const original=fs.readFileSync(path.join(root,'assets/audio/clear_voice.wav'));
+assert.deepEqual(fs.readFileSync(path.join(root,'artifacts/web/assets/audio/clear_voice.wav')),original);
+const audio=JSON.parse(fs.readFileSync(path.join(root,'START.html'),'utf8').match(/window\.NAMAKO_AUDIO=(\{.*?\});<\/script>/s)[1]);
+assert.deepEqual(Buffer.from(audio.clear_voice.split(',')[1],'base64'),original);
+const wait=(page,fn)=>page.waitForFunction(fn,null,{polling:50,timeout:10000});
+(async()=>{const browser=await chromium.launch({...require('./browser_test_support').launchOptions,args:['--autoplay-policy=no-user-gesture-required']});try{
+ const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>{window.NAMAKO_TEST_MODE=true;window.requestAnimationFrame=()=>0;});await page.goto(url);await page.waitForFunction(()=>window.__namako);
+ await page.evaluate(()=>{const g=__namako;g.beginPlay();g.audio.musicEnabled=false;g.audio.apply();window.clearCalls=[];const play=g.audio.play.bind(g.audio);g.audio.play=(name,demo)=>{clearCalls.push({name,demo});play(name,demo);};g.clear();g.update(.49);if(g.audio.voicePlaying('clear_voice'))throw Error('Voice played before landing');g.update(.02);if(g.celebrationStage!=='view')throw Error('Completed tank view missing');g.update(.98);if(clearCalls.some(x=>x.name==='clear_voice'))throw Error('Voice played before celebration');g.update(.02);g.clear();});
+ await wait(page,()=>__namako.audio.voices.clear_voice[0].currentTime>.05);
+ assert.equal(await page.evaluate(()=>clearCalls.filter(x=>x.name==='clear_voice').length),1);
+ assert(Math.abs(await page.evaluate(()=>__namako.audio.voices.clear_voice[0].duration)-2.0393650793650795)<.001);
+ assert.equal(await page.evaluate(()=>__namako.audio.voices.fanfare[0].volume),.16,'fanfare lowered below speech');
+ await page.evaluate(()=>{__namako.update(.8);if(__namako.mode!=='celebrate')throw Error('Voice must have time before reward');});
+ await wait(page,()=>__namako.audio.voices.clear_voice[0].ended);
+ await page.evaluate(()=>{__namako.update(1.4);if(__namako.mode!=='reveal')throw Error('Reward missing after complete voice');});
+ assert.equal(await page.evaluate(()=>clearCalls.filter(x=>x.name==='clear_voice').length),1);
+ await page.evaluate(()=>{const g=__namako;g.beginPlay();g.audio.sfxEnabled=false;g.clear();g.update(1.51);if(g.audio.voicePlaying('clear_voice'))throw Error('SFX OFF must suppress voice');g.update(2.3);if(g.mode!=='reveal')throw Error('Silent clear must continue');g.beginDemo();g.audio.sfxEnabled=true;g.clear(true);g.update(1.51);});
+ await wait(page,()=>__namako.audio.voicePlaying('clear_voice'));
+ assert.equal(await page.evaluate(()=>__namako.audio.voices.clear_voice.find(a=>!a.paused).volume),.42,'demo uses softer clear voice');
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});
+ assert.equal(await page.evaluate(()=>__namako.audio.voices.clear_voice.every(a=>a.paused)),true,'hide cancels clear speech');
+ assert.deepEqual(errors,[]);console.log('PASS clear voice: supplied WAV in both web builds, actual playback once after landing/view, full speech before reward, quieter accompaniment, SFX OFF, demo volume, hidden-tab cancellation.');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

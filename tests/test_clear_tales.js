@@ -47,10 +47,10 @@ function prepare(g){
   });
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('celebrate-banner')).opacity==='1',null,{polling:50,timeout:3000});
   if(size[0]===390)await page.screenshot({path:path.join(out,`${lang}_${theme}_party.png`)});
-  await page.evaluate(()=>{const g=__namako;g.update(.78);if(g.mode!=='celebrate')throw Error('Celebration cut short');g.update(.02);if(g.mode!=='reveal')throw Error('Reward missing');if(!document.getElementById('trivia').hidden)throw Error('Automatic doctor');});
+  await page.evaluate(()=>{const g=__namako;g.update(2.18);if(g.mode!=='celebrate')throw Error('Celebration cut short');g.update(.02);if(g.mode!=='reveal')throw Error('Reward missing');if(!document.getElementById('trivia').hidden)throw Error('Automatic doctor');});
   // Reload during the reward: the clear is replayed, the same reward stays owned once.
   await page.reload();await page.waitForFunction(()=>window.__namako);
-  await page.evaluate(()=>{const g=__namako;g.audio.musicEnabled=false;g.resumeSaved();if(g.mode!=='celebrate'||g.cards.totalOwned()!==1)throw Error('Resume duplicates/misses reward');g.update(2.4);if(g.mode!=='reveal')throw Error('Resume reveal');g.finishReward();if(g.mode!=='play'||g.cards.totalOwned()!==1)throw Error('Next tank must skip doctor');g.pause();g.openLore();if(g.mode!=='trivia')throw Error('Manual notes missing');
+  await page.evaluate(()=>{const g=__namako;g.audio.musicEnabled=false;g.resumeSaved();if(g.mode!=='celebrate'||g.cards.totalOwned()!==1)throw Error('Resume duplicates/misses reward');g.update(CELEBRATION_SECONDS+.1);if(g.mode!=='reveal')throw Error('Resume reveal');g.finishReward();if(g.mode!=='play'||g.cards.totalOwned()!==1)throw Error('Next tank must skip doctor');g.pause();g.openLore();if(g.mode!=='trivia')throw Error('Manual notes missing');
    const ids=[];g.trivia.remaining=[];for(let i=0;i<200;i++)ids.push(g.trivia.pick().id);if(new Set(ids).size!==200)throw Error('Repeated reading cycle');const last=ids.at(-1);if(g.trivia.pick().id===last)throw Error('Cycle boundary repeat');
    const e=g.trivia.byId(101);g.triviaEpisode=e;g.renderTrivia(e);g.sync();
    if(!document.querySelector('.trivia-footnote').textContent.includes(NamakoI18n.locale==='ja'?'フィクション':'Fiction'))throw Error('Fiction label');
@@ -58,12 +58,12 @@ function prepare(g){
   await page.waitForFunction(()=>getComputedStyle(document.getElementById('trivia')).opacity==='1',null,{polling:50,timeout:3000});
   if(size[0]===390)await page.screenshot({path:path.join(out,`${lang}_${theme}_tale.png`)});
   await page.evaluate(()=>{
-   const g=__namako;g.finishTrivia();if(g.mode!=='paused')throw Error('Notes return');const count=g.cards.totalOwned();g.beginDemo();g.clear(true);g.update(2.4);if(g.mode!=='trivia'||g.cards.totalOwned()!==count)throw Error('Demo notes missing/reward granted');if(g.demoOverlayTime<12||g.demoOverlayTime>40)throw Error('Reading delay');const wait=g.demoOverlayTime;g.update(wait-.1);if(g.mode!=='trivia')throw Error('Reading cut short');g.update(.2);if(g.mode!=='demo')throw Error('Demo failed to restart');g.openLore();g.update(45);if(g.mode!=='trivia'||g.triviaReturnMode!=='demo')throw Error('Manual reader auto-closed');g.finishTrivia();
-   for(const id of ['theme','track','speed','music','sfx','lore-button','difficulty']){const el=document.getElementById(id),r=el.getBoundingClientRect();if(r.left<-.5||r.right>innerWidth+.5)throw Error('Button out of viewport '+id);}g.reduced=true;g.clear(true);g.update(2.4);g.draw();
+   const g=__namako;g.finishTrivia();if(g.mode!=='paused')throw Error('Notes return');const count=g.cards.totalOwned();g.beginDemo();g.clear(true);g.update(CELEBRATION_SECONDS+.1);if(g.mode!=='trivia'||g.cards.totalOwned()!==count)throw Error('Demo notes missing/reward granted');if(g.demoOverlayTime<12||g.demoOverlayTime>40)throw Error('Reading delay');const wait=g.demoOverlayTime;g.update(wait-.1);if(g.mode!=='trivia')throw Error('Reading cut short');g.update(.2);if(g.mode!=='demo')throw Error('Demo failed to restart');g.openLore();g.update(45);if(g.mode!=='trivia'||g.triviaReturnMode!=='demo')throw Error('Manual reader auto-closed');g.finishTrivia();
+   for(const id of ['theme','track','speed','music','sfx','lore-button','difficulty']){const el=document.getElementById(id),r=el.getBoundingClientRect();if(r.left<-.5||r.right>innerWidth+.5)throw Error('Button out of viewport '+id);}g.reduced=true;g.clear(true);g.update(CELEBRATION_SECONDS+.1);g.draw();
    if(g.mode!=='trivia')throw Error('Reduced motion demo notes');g.openTriviaCard(document.getElementById('trivia-dog-card').src,'Dog');const remaining=g.demoOverlayTime;g.update(45);if(g.demoOverlayTime!==remaining)throw Error('Reading timer did not pause for card');g.closeTriviaCard();g.finishTrivia();if(g.mode!=='demo')throw Error('Continue demo');
   });
   assert.deepEqual(errors,[]);assert.deepEqual(warnings,[]);await context.close();cases++;
  }
- console.log(`PASS ${cases} browser cases: ja/en × light/dark/LCD × phone sizes; real landing, 2.3s sequence, fanfare, single saved reward/reload, next tank, manual 200-story cycle, fiction label, timed demo notes, manual reading, card-view timer pause, reduced motion.`);
+ console.log(`PASS ${cases} browser cases: ja/en × light/dark/LCD × phone sizes; real landing, voice-aware 3.7s sequence, fanfare, single saved reward/reload, next tank, manual 200-story cycle, fiction label, timed demo notes, manual reading, card-view timer pause, reduced motion.`);
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

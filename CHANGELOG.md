@@ -1,3 +1,16 @@
+# HTML opening audio — 2026-10-05
+
+- Add six soft body colours to LCD creatures, including settled/falling creatures, NEXT and jelly joins; retain outlines and dot marks.
+- Publish these browser changes to the main GitHub test site; suspend runtime-folder updates.
+- Show the updated audio opening once to returning testers, then remember dismissal independently of the old guide.
+- Version web script/style URLs by source hash to avoid mixing cached older assets with the updated test site.
+- Replace opening audio with the supplied 81,664-byte, 1.85-second WAV; retain the original audio bytes.
+- Play the supplied 89,980-byte "Yatta ne" clear voice once when celebration begins; hold the completed tank for the full voice, then show the reward.
+- Lower clear/fanfare accompaniment under the voice; honour SFX OFF and stop speech when hidden or leaving the page.
+- Offer tap-to-play when browser autoplay is blocked, plus stop/replay controls in Japanese and English.
+- Hold BGM and gameplay SFX while the guide is open; stop the clip on guide exit, hidden tab or page exit.
+- Respect the saved SFX OFF setting; reopening the guide offers manual playback without repeating it automatically.
+
 # v0.4.10 — 2026-10-03
 
 - Preserve current main v0.4.9 UI, settings, music level, Back handling and optimized art.

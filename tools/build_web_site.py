@@ -2,6 +2,8 @@
 from pathlib import Path
 import json
 import shutil
+import hashlib
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT/'artifacts/web'
@@ -22,8 +24,18 @@ for rel in paths:
     target = OUTPUT/rel
     target.parent.mkdir(parents=True,exist_ok=True)
     shutil.copy2(source,target)
+# A cached browser asset must not mix an old UI with a new site entry.
+def version_assets(html):
+    def replace(match):
+        name=match.group(2)
+        source=ROOT/'browser'/name
+        assert source.is_file() and source.resolve().is_relative_to((ROOT/'browser').resolve())
+        digest=hashlib.sha256(source.read_bytes()).hexdigest()[:12]
+        return match.group(1)+name+'?v='+digest+match.group(3)
+    return re.sub(r'(\b(?:src|href)=")([^"?]+\.(?:js|css))(")',replace,html)
 # Entry at the repository's Pages root; assets resolve from browser/ even on subpaths.
-html = (ROOT/'browser/START.html').read_text(encoding='utf-8')
+html = version_assets((ROOT/'browser/START.html').read_text(encoding='utf-8'))
+(OUTPUT/'browser/START.html').write_text(html,encoding='utf-8',newline='\n')
 html = html.replace('<head>','<head>\n<base href="browser/">')
 (OUTPUT/'index.html').write_text(html,encoding='utf-8',newline='\n')
 (OUTPUT/'.nojekyll').write_text('',encoding='utf-8')
