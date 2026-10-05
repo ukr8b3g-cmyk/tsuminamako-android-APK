@@ -1,3 +1,11 @@
+# Doctor introduction card thumbnail — 2026-10-05
+
+- Add the existing bilingual doctor introduction card beside the dog and dolphin thumbnails in notes; retain portrait tap access.
+- Play the supplied 130,580-byte, 2.96-second voice when opening that card, interrupting the notes entry voice to avoid overlap.
+- Duck BGM during either doctor voice; stop card speech on close, notes exit, reset or backgrounding and respect SFX OFF.
+- Fit three distinct tap targets on narrow phones without generating or changing existing artwork.
+- Also play the supplied dolphin (89,764 bytes, 2.03 seconds) and dog (141,164 bytes, 3.2 seconds) voices only when opening their corresponding cards, with the same cancellation and BGM behaviour.
+
 # Doctor's notes introduction audio — 2026-10-05
 
 - Play the supplied 143,538-byte, 3.25-second doctor introduction once on opening notes (manual browsing, demo clear or a restored notes screen).
