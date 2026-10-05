@@ -30,7 +30,9 @@ for p in ROOT.rglob('*'):
     if rel.parts[0] == 'tests' and (p.suffix in {'.png', '.import', '.uid'} or '_results' in p.name or any('validation' in part for part in rel.parts)):
         continue
     paths.append(p)
-files = {str(p.relative_to(ROOT)).replace('\\','/'): sha(p) for p in sorted(paths)}
+# Path ordering differs between Windows (case-folded) and Linux (case-sensitive).
+# Sort repository-relative strings explicitly so --check is portable across OSes.
+files = {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted(paths, key=lambda p: p.relative_to(ROOT).as_posix())}
 artifacts = [ROOT/'START.html'] + sorted((ROOT/'builds').glob('*.apk')) + sorted((ROOT/'builds').glob('*.aab'))
 artifacts = [p for p in artifacts if p.is_file()] if args.artifacts else []
 manifest = {
