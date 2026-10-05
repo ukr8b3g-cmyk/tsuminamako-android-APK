@@ -1,3 +1,9 @@
+# Doctor's notes introduction audio — 2026-10-05
+
+- Play the supplied 143,538-byte, 3.25-second doctor introduction once on opening notes (manual browsing, demo clear or a restored notes screen).
+- Keep the introduction from repeating on the next story, language changes or card zoom; close/reopen starts it again.
+- Lower BGM during the voice and restore its saved level at the end; respect SFX OFF and stop on notes exit, new tank, tab hiding or page exit.
+
 # HTML opening audio — 2026-10-05
 
 - Add six soft body colours to LCD creatures, including settled/falling creatures, NEXT and jelly joins; retain outlines and dot marks.

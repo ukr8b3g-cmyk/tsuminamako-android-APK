@@ -43,4 +43,5 @@ jobs:
           node tests/test_mobile_onboarding.js
           node tests/test_opening_audio.js
           node tests/test_clear_audio.js
+          node tests/test_lore_audio.js
           node tests/test_lcd_colors.js
