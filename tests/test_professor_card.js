@@ -6,7 +6,7 @@ const embedded=JSON.parse(fs.readFileSync(path.join(root,'START.html'),'utf8').m
 const voices=['professor_card_voice','dog_card_voice','dolphin_card_voice'];
 for(const name of voices){const original=fs.readFileSync(path.join(root,`assets/audio/${name}.wav`));assert.deepEqual(fs.readFileSync(path.join(root,`artifacts/web/assets/audio/${name}.wav`)),original);assert.deepEqual(Buffer.from(embedded[name].split(',')[1],'base64'),original);}
 const wait=(page,fn)=>page.waitForFunction(fn,null,{polling:50,timeout:10000});
-const stopped=page=>page.evaluate(()=>['professor_card_voice','dog_card_voice','dolphin_card_voice'].every(name=>__namako.audio.voices[name].every(a=>a.paused&&a.currentTime===0)));
+const stopped=page=>page.evaluate(()=>__namako.audio.narration.voice.paused&&__namako.audio.narration.voice.currentTime===0);
 (async()=>{const browser=await chromium.launch(require('./browser_test_support').launchOptions);try{
  for(const language of ['ja','en']){
   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true,reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
@@ -37,32 +37,33 @@ const stopped=page=>page.evaluate(()=>['professor_card_voice','dog_card_voice','
   }
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{__namako.lcd=false;__namako.dark=true;__namako.applyTheme();__namako.resize();});
   if(process.env.NAMAKO_SCREENSHOTS){fs.mkdirSync(path.join(root,'artifacts/tests'),{recursive:true});await page.screenshot({path:path.join(root,`artifacts/tests/professor_thumbnails_${language}.png`)});}
-  await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.voices.professor_card_voice[0].currentTime>.05);
+  await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.narration.voice.currentTime>.05);
   assert.equal(await page.locator('#trivia-card-viewer').isVisible(),true);
+  if(process.env.NAMAKO_SCREENSHOTS)await page.screenshot({path:path.join(root,`artifacts/tests/voice_card_${language}.png`)});
   assert.equal(await page.evaluate(()=>document.getElementById('trivia-card-large').src),await page.evaluate(()=>document.getElementById('trivia-professor-card').src));
   assert.equal(await page.evaluate(()=>__namako.audio.voicePlaying('professor_voice')),false,'notes entry voice stops before card voice');
-  assert(Math.abs(await page.evaluate(()=>__namako.audio.voices.professor_card_voice[0].duration)-2.96)<.001);
-  assert(Math.abs(await page.evaluate(()=>__namako.audio.music.volume)-musicLevel*.3)<.0001);
+  assert(Math.abs(await page.evaluate(()=>__namako.audio.narration.voice.duration)-2.96)<.001);
+  assert.equal(await page.evaluate(()=>__namako.audio.music.paused),true,'BGM paused during speech');
   await page.locator('#trivia-card-close').tap();assert.equal(await stopped(page),true);
-  assert(Math.abs(await page.evaluate(()=>__namako.audio.music.volume)-musicLevel)<.0001,'close restores BGM');
+  await wait(page,()=>!__namako.audio.music.paused&&__namako.audio.music.volume>0);
   await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.voicePlaying('professor_card_voice'));
   assert.equal(await page.evaluate(()=>__namako.audio.voiceIndex.professor_card_voice),2,'one voice per opening');
-  await wait(page,()=>__namako.audio.voices.professor_card_voice[1].ended&&!__namako.audio.narrationActive);
-  assert(Math.abs(await page.evaluate(()=>__namako.audio.music.volume)-musicLevel)<.0001,'ended restores BGM');
+  await wait(page,()=>__namako.audio.narration.voice.ended&&!__namako.audio.narrationActive);
+  await wait(page,()=>!__namako.audio.music.paused&&__namako.audio.music.volume>0);
   await page.locator('#trivia-card-close').tap();
   for(const [id,name,duration] of [['trivia-dog-open','dog_card_voice',3.2],['trivia-dolphin-open','dolphin_card_voice',2.034467120181406]]){
-   await page.locator('#'+id).tap();await page.waitForFunction(name=>__namako.audio.voices[name].some(a=>!a.paused&&a.currentTime>.05),name,{polling:50,timeout:10000});
-   const state=await page.evaluate(name=>({duration:__namako.audio.voices[name].find(a=>!a.paused).duration,playing:['professor_card_voice','dog_card_voice','dolphin_card_voice','professor_voice'].filter(n=>__namako.audio.voicePlaying(n))}),name);
+   await page.locator('#'+id).tap();await page.waitForFunction(name=>__namako.audio.voicePlaying(name)&&__namako.audio.narration.voice.currentTime>.05,name,{polling:50,timeout:10000});
+   const state=await page.evaluate(name=>({duration:__namako.audio.narration.voice.duration,playing:['professor_card_voice','dog_card_voice','dolphin_card_voice','professor_voice'].filter(n=>__namako.audio.voicePlaying(n))}),name);
    assert(Math.abs(state.duration-duration)<.001);assert.deepEqual(state.playing,[name],'only matching card speech');
-   assert(Math.abs(await page.evaluate(()=>__namako.audio.music.volume)-musicLevel*.3)<.0001);await page.locator('#trivia-card-close').tap();assert.equal(await stopped(page),true);
+   assert.equal(await page.evaluate(()=>__namako.audio.music.paused),true,'BGM paused during speech');await page.locator('#trivia-card-close').tap();assert.equal(await stopped(page),true);
   }
   await page.locator('#trivia-professor-open').tap();await wait(page,()=>__namako.audio.voicePlaying('professor_card_voice'));await page.locator('#trivia-card-large').tap();assert.equal(await stopped(page),true,'portrait opens same card and image tap stops voice');
   await page.evaluate(()=>__namako.audio.toggleSfx());for(const id of ['trivia-professor-thumb','trivia-dog-open','trivia-dolphin-open']){await page.locator('#'+id).tap();assert.equal(await stopped(page),true,'SFX OFF respected');await page.locator('#trivia-card-close').tap();}await page.evaluate(()=>__namako.audio.toggleSfx());
   await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.voicePlaying('professor_card_voice'));await page.evaluate(()=>__namako.finishTrivia());assert.equal(await stopped(page),true,'notes exit stops card speech');
   await page.locator('#lore-button').tap();await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.voicePlaying('professor_card_voice'));await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));assert.equal(await stopped(page),true,'page exit stops card speech');
-  await page.locator('#trivia-card-close').tap();await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.voicePlaying('professor_card_voice'));
+  await page.evaluate(()=>__namako.audio.resumeAudio());await page.locator('#trivia-card-close').tap();await page.locator('#trivia-professor-thumb').tap();await wait(page,()=>__namako.audio.voicePlaying('professor_card_voice'));
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});assert.equal(await stopped(page),true,'background stops card speech');
   assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>NamakoI18n.missing.size),0);await context.close();
  }
- console.log('PASS character cards: 3 existing bilingual thumbnails; 320/390/430 portrait and landscape in all themes; matching doctor/dog/dolphin WAV playback, no overlapping speech, replay, BGM duck/restore, SFX OFF and close/exit/background cancellation.');
+ console.log('PASS character cards: 3 existing bilingual thumbnails; 320/390/430 portrait and landscape in all themes; matching doctor/dog/dolphin WAV playback, no overlapping speech, replay, BGM pause/resume, SFX OFF and close/exit/background cancellation.');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

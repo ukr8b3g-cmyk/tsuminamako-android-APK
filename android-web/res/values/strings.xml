@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">つみなまこ</string>
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">#0a1822</item>
+        <item name="android:colorAccent">#65c9d9</item>
+    </style>
+</resources>

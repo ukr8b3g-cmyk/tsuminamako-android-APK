@@ -12,6 +12,10 @@ Web公開は `.github/workflows/pages.yml` が `main` 更新時に行います�
 
 Godot 4.7.2 / HTML edition. First launch uses Japanese. Settings has a Japanese/English button; the selected language is saved.
 
+## HTML test / Android WebView APK v0.4.16
+
+Latest HTML test and Android WebView APK v0.4.16 use a single preloaded narration player, pause BGM during character speech and offer Voice/Stop/Replay controls. See [voice reliability and verification](docs/NARRATION_0.4.16_JA.md). Android build source is in `android-web/`; existing Godot sources are retained.
+
 ## v0.4.14 local build
 
 Switch Japanese/English from the Settings header without restarting a round. Buttons, rules, current status, cards, companion artwork and the 200-story notebook change together; reading history and collected cards are preserved. On a same-colour match, the boundaries stretch together, the connected jelly briefly wobbles, then bubbles appear and the body fades. The sequence lasts 0.9s; reduced motion uses a 0.35s fade. The matching rule and difficulty are unchanged.

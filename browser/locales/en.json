@@ -171,7 +171,6 @@
     "このお試し版ではJavaScriptを有効にしてください。通信・ログインは不要です。": "Enable JavaScript to play this preview. No connection or login is needed.",
     "Ⅱ ポーズ": "Ⅱ Pause",
     "ポーズ": "Pause",
-    "博士": "Doctor",
     "ぽにゅ散歩": "Squishy Stroll",
     "博士のうんちくへ ▶": "Doctor's Notes ▶",
     "急がなくて大丈夫。\n「はじめから」で空の水槽からやり直せます。": "Take your time.\nTap New Game to restart with an empty tank.",
@@ -233,7 +232,14 @@
     "Ⅱ メニュー": "Ⅱ Menu",
     "Ⅱ\nメニュー": "Ⅱ\nMenu",
     "デモ中 · 速さを変えて眺めよう": "Demo · Change the speed and watch",
-    "スライドで移動 · タップで回転 · 下へスワイプ": "Slide to move · Tap to rotate · Swipe down"
+    "スライドで移動 · タップで回転 · 下へスワイプ": "Slide to move · Tap to rotate · Swipe down",
+    "▶ 音声": "▶ Voice",
+    "■ 停止": "■ Stop",
+    "準備中…": "Loading…",
+    "↻ もう一度": "↻ Replay",
+    "音声 OFF": "Voice OFF",
+    "紹介音声を聞く": "Play introduction voice",
+    "↻ 再試行": "↻ Retry"
   },
   "lore": {
     "version": "2.1",

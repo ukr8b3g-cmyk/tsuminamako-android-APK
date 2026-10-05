@@ -1,3 +1,10 @@
+# Narration reliability — HTML test / APK v0.4.16
+
+- Use one preloaded narration player for the notes introduction and three character cards.
+- Pause BGM during speech; resume its position and saved level, respecting OFF and background state.
+- Add bilingual voice/replay controls, one transient retry, bounded failure handling and stale-request cancellation.
+- Include the offline Android WebView host source and regression checks. See `docs/NARRATION_0.4.16_JA.md` for verification scope; physical Android audio remains unverified.
+
 # Doctor introduction card thumbnail — 2026-10-05
 
 - Add the existing bilingual doctor introduction card beside the dog and dolphin thumbnails in notes; retain portrait tap access.

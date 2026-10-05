@@ -317,3 +317,13 @@ html[data-theme="lcd"] #stage[data-touch="true"] :is(#settings-open,#difficulty,
 .intro-steps svg{width:94px;height:48px}.step-number{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#93e5d5;color:#123b47;font-size:14px;font-weight:900}.intro-steps h4{font-size:16px;line-height:1.25;margin:0 0 4px}.intro-steps p{font-size:13px;line-height:1.35;margin:0;color:#c5e7ed}
 .intro-touch{font-size:13px;line-height:1.5;text-align:center;margin:14px 2px 6px;color:#acf0ed}.intro-goal{font-size:14px;line-height:1.5;text-align:center;margin:6px 0 13px;color:#fff0bc}.intro-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.intro-actions button{width:100%;min-height:56px!important;font-size:18px!important;font-weight:800}.intro-actions #intro-return{grid-column:1/-1}
 @media(max-width:360px){.intro-steps article{grid-template-columns:20px 70px 1fr;gap:6px;padding:8px}.intro-steps svg{width:70px;height:42px}.intro-steps h4{font-size:15px}.intro-hero{max-height:135px}}
+
+/* Narration controls retain physical touch targets when the stage scales. */
+#trivia-audio{left:18px;width:144px;font-size:20px;background:#fff4db!important;color:#244653!important;border:2px solid #d7af73!important}
+#trivia #trivia-more{left:170px;width:136px;font-size:20px}
+#trivia #trivia-next,#trivia.browse #trivia-next{left:314px;width:158px;font-size:20px}
+#trivia-card-audio{left:17px;top:16px;width:230px;height:64px;font-size:22px;background:#fff4db!important;color:#244653!important;border:2px solid #d7af73!important}
+#trivia-card-close{height:64px}
+#trivia-card-viewer{padding-top:max(90px,calc(var(--touch-target-height,44px) + 28px))}
+#stage[data-touch="true"] :is(#trivia-audio,#trivia-more,#trivia-next,#trivia-card-audio,#trivia-card-close){font-size:max(20px,var(--touch-header-font))!important}
+#stage[data-touch="true"] :is(#trivia-card-audio,#trivia-card-close){height:max(64px,var(--touch-target-height))}

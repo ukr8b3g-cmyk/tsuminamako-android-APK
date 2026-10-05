@@ -45,4 +45,5 @@ jobs:
           node tests/test_clear_audio.js
           node tests/test_lore_audio.js
           node tests/test_professor_card.js
+          node tests/test_narration_recovery.js
           node tests/test_lcd_colors.js

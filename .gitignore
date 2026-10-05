@@ -11,3 +11,4 @@ tests/*_results.json
 tests/*.png
 tests/*.cfg
 /START.html
+/android-web/.build/

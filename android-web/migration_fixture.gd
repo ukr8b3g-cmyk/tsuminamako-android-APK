@@ -1,0 +1,33 @@
+extends SceneTree
+func _initialize() -> void:
+    var folder := "res://android-web/.build/legacy"
+    DirAccess.make_dir_recursive_absolute(folder)
+    var cards := ConfigFile.new()
+    cards.set_value("cards", "card_01", 3)
+    cards.set_value("cards", "card_02", 1)
+    cards.set_value("progress", "last_grant", {"legacy-round": "card_01"})
+    cards.set_value("progress", "completion_seen", false)
+    cards.set_value("progress", "completion_size", 20)
+    cards.save(folder + "/namako_cards.cfg")
+    var settings := ConfigFile.new()
+    settings.set_value("audio", "music", false)
+    settings.set_value("audio", "sfx", true)
+    settings.set_value("audio", "level", 0.35)
+    settings.set_value("audio", "track", 3)
+    settings.set_value("appearance", "dark", false)
+    settings.set_value("appearance", "lcd", true)
+    settings.set_value("appearance", "reduced_motion", true)
+    settings.set_value("gameplay", "speed_index", 3)
+    settings.set_value("gameplay", "difficulty_index", 0)
+    settings.save(folder + "/namako_settings.cfg")
+    var language := ConfigFile.new()
+    language.set_value("ui", "language", "en")
+    language.save(folder + "/namako_language.cfg")
+    var board := PackedInt32Array()
+    board.resize(96)
+    var bag: Array[int] = [0,1,2,3,4,5]
+    var active: Array[Vector2i] = [Vector2i(0,0),Vector2i(1,0)]
+    var session := ConfigFile.new()
+    session.set_value("session", "state", {"version":3,"round":"legacy-round","model":{"board":board,"pieces":{},"next_id":1,"kept":0,"cleared":0,"slipped":0,"turns":0,"random_state":123,"bag":bag},"active":active,"origin":Vector2i(3,-3),"color":2,"next":{"shape":1,"color":3},"phase":0,"mode":"game","trivia_id":0,"difficulty":0,"target_ratio":0.85})
+    session.save(folder + "/namako_session.cfg")
+    quit()
